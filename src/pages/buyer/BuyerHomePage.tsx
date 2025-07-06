@@ -1,0 +1,111 @@
+import React, { useState } from 'react';
+import { Search, Filter, MapPin, TrendingUp, Percent, Clock } from 'lucide-react';
+import BusinessCard from '../../components/Business/BusinessCard';
+import { mockBusinesses } from '../../data/mockData';
+
+export default function BuyerHomePage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const categories = ['all', 'Electronics', 'Food', 'Stationery', 'Books', 'Beverages', 'Accessories'];
+
+  const filteredBusinesses = mockBusinesses.filter(business => {
+    const matchesSearch = business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         business.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || 
+                           business.categories.some(cat => cat === selectedCategory);
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Section */}
+        <div className="mb-8">
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search for businesses, products, or services..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+            />
+          </div>
+          
+          {/* Category Filters */}
+          <div className="flex flex-wrap gap-2 mt-4 justify-center">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  selectedCategory === category
+                    ? 'bg-green-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-700'
+                }`}
+              >
+                {category === 'all' ? 'All Categories' : category}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Section Headers */}
+        <div className="space-y-12">
+          {/* Most Viewed Businesses */}
+          <section>
+            <div className="flex items-center mb-6">
+              <TrendingUp className="h-6 w-6 text-green-600 mr-3" />
+              <h2 className="text-2xl font-bold text-gray-900">Most Viewed Businesses</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBusinesses.slice(0, 3).map((business) => (
+                <BusinessCard key={business.id} business={business} />
+              ))}
+            </div>
+          </section>
+
+          {/* Businesses with Discounts */}
+          <section>
+            <div className="flex items-center mb-6">
+              <Percent className="h-6 w-6 text-green-600 mr-3" />
+              <h2 className="text-2xl font-bold text-gray-900">Special Offers & Discounts</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBusinesses.map((business) => (
+                <BusinessCard key={business.id} business={business} />
+              ))}
+            </div>
+          </section>
+
+          {/* Closest to You */}
+          <section>
+            <div className="flex items-center mb-6">
+              <MapPin className="h-6 w-6 text-green-600 mr-3" />
+              <h2 className="text-2xl font-bold text-gray-900">Closest to You</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBusinesses.slice(0, 2).map((business) => (
+                <BusinessCard key={business.id} business={business} />
+              ))}
+            </div>
+          </section>
+
+          {/* Recently Active */}
+          <section>
+            <div className="flex items-center mb-6">
+              <Clock className="h-6 w-6 text-green-600 mr-3" />
+              <h2 className="text-2xl font-bold text-gray-900">Recently Active</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBusinesses.map((business) => (
+                <BusinessCard key={business.id} business={business} />
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
