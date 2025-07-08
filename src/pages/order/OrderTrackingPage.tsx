@@ -228,17 +228,41 @@ export default function OrderTrackingPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Rate Your Experience</h2>
             <p className="text-gray-600 mb-4">Help other students by sharing your experience with this order.</p>
-            <button
-              onClick={() => setShowReviewModal(true)}
-              className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Star className="h-5 w-5" />
-              <span>Write a Review</span>
-            </button>
+            <div className="flex space-x-4">
+              <Link
+                to={`/reviews/write?orderId=${order.id}&businessId=${order.items[0]?.businessName}`}
+                className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Star className="h-5 w-5" />
+                <span>Review Business</span>
+              </Link>
+              <button
+                onClick={() => setShowReviewModal(true)}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Star className="h-5 w-5" />
+                <span>Quick Review</span>
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Review Modal */}
+        {/* Quick Review Modal */}
+        {order.status === 'delivered' && order.canReview && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Rate Your Experience</h2>
+            <p className="text-gray-600 mb-4">Help other students by sharing your experience with this order.</p>
+            <Link
+              to={`/reviews/write?orderId=${order.id}&businessId=${order.items[0]?.businessName}`}
+              className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors inline-flex"
+            >
+              <Star className="h-5 w-5" />
+              <span>Write a Review</span>
+            </Link>
+          </div>
+        )}
+
+        {/* Quick Review Modal */}
         {showReviewModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl max-w-md w-full p-6">

@@ -16,6 +16,8 @@ import OrderTrackingPage from './pages/order/OrderTrackingPage';
 import ChatPage from './pages/chat/ChatPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import ReportVendorPage from './pages/report/ReportVendorPage';
+import ReviewsPage from './pages/reviews/ReviewsPage';
+import WriteReviewPage from './pages/reviews/WriteReviewPage';
 
 // Protected Route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -104,6 +106,17 @@ function AppContent() {
             </ProtectedRoute>
           } />
 
+          <Route path="/reviews" element={
+            <ProtectedRoute>
+              <ReviewsPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/reviews/write" element={
+            <ProtectedRoute>
+              <WriteReviewPage />
+            </ProtectedRoute>
+          } />
           {/* Placeholder routes for features mentioned in spec but not fully implemented */}
           <Route path="/buyer/orders" element={
             <ProtectedRoute>

@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { Phone, MessageCircle, Star, MapPin, Heart, ArrowLeft, ExternalLink, Flag, Calendar, TrendingUp, Shield, Clock } from 'lucide-react';
 import { mockBusinesses, mockProducts, mockReviews } from '../../data/mockData';
 import ProductCard from '../../components/Product/ProductCard';
+import ReviewCard from '../../components/Review/ReviewCard';
+import ReviewSummary from '../../components/Review/ReviewSummary';
 import { useApp } from '../../contexts/AppContext';
 
 export default function BusinessProfilePage() {
@@ -12,7 +14,7 @@ export default function BusinessProfilePage() {
 
   const business = mockBusinesses.find(b => b.id === businessId);
   const businessProducts = mockProducts.filter(p => p.businessId === businessId);
-  const businessReviews = mockReviews.filter(r => r.businessId === businessId);
+  const businessReviews = [...mockReviews, ...state.reviews].filter(r => r.businessId === businessId);
   const isFavorite = state.favorites.some(fav => fav.id === businessId);
 
   if (!business) {
@@ -220,49 +222,55 @@ export default function BusinessProfilePage() {
             {activeTab === 'reviews' && (
               <div>
                 {businessReviews.length > 0 ? (
-                  <div className="space-y-6">
-                    {businessReviews.map((review) => (
-                      <div key={review.id} className="border-b border-gray-200 pb-6 last:border-b-0">
-                        <div className="flex items-start space-x-4">
-                          <img
-                            src={review.userAvatar || `https://ui-avatars.com/api/?name=${review.userName}&background=10b981&color=fff`}
-                            alt={review.userName}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div>
-                                <p className="font-medium text-gray-900 flex items-center space-x-2">
-                                  <span>{review.userName}</span>
-                                  {review.verified && (
-                                    <Shield className="h-4 w-4 text-green-600" title="Verified Purchase" />
-                                  )}
-                                </p>
-                                <p className="text-sm text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star 
-                                    key={star} 
-                                    className={`h-4 w-4 ${star <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                            <p className="text-gray-600 mb-3">{review.comment}</p>
-                            {review.helpful && review.helpful > 0 && (
-                              <p className="text-sm text-gray-500">{review.helpful} people found this helpful</p>
-                            )}
-                          </div>
-                        </div>
+                  <div className="space-y-8">
+                    <ReviewSummary
+                      averageRating={businessReviews.reduce((sum, r) => sum + r.rating, 0) / businessReviews.length}
+                      totalReviews={businessReviews.length}
+                      ratingDistribution={businessReviews.reduce((acc, r) => {
+                        acc[r.rating] = (acc[r.rating] || 0) + 1;
+                        return acc;
+                      }, {} as { [key: number]: number })}
+                    />
+                    
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Customer Reviews</h3>
+                      <Link
+                        to={`/reviews/write?businessId=${business.id}`}
+                        className="text-sm text-green-600 hover:text-green-700 font-medium"
+                      >
+                        Write a review
+                      </Link>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      {businessReviews.slice(0, 5).map((review) => (
+                        <ReviewCard key={review.id} review={review} />
+                      ))}
+                    </div>
+                    
+                    {businessReviews.length > 5 && (
+                      <div className="text-center">
+                        <Link
+                          to={`/reviews?businessId=${business.id}`}
+                          className="text-green-600 hover:text-green-700 font-medium"
+                        >
+                          View all {businessReviews.length} reviews
+                        </Link>
                       </div>
-                    ))}
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-12">
                     <Star className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">No reviews yet</h3>
-                    <p className="text-gray-600">Be the first to review this business!</p>
+                    <p className="text-gray-600 mb-4">Be the first to review this business!</p>
+                    <Link
+                      to={`/reviews/write?businessId=${business.id}`}
+                      className="inline-flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <Star className="h-4 w-4" />
+                      <span>Write the first review</span>
+                    </Link>
                   </div>
                 )}
               </div>

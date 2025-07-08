@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Heart, User, MessageCircle, Package, Bell, LogOut } from 'lucide-react';
+import { ShoppingCart, Heart, User, MessageCircle, Package, Bell, LogOut, Star } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 
 export default function Header() {
@@ -49,6 +49,13 @@ export default function Header() {
               <span className="hidden sm:inline">Favorites</span>
             </Link>
 
+            <Link
+              to="/reviews"
+              className="flex items-center space-x-1 text-gray-600 hover:text-green-600 transition-colors"
+            >
+              <Star className="h-5 w-5" />
+              <span className="hidden sm:inline">Reviews</span>
+            </Link>
             <Link
               to="/chat"
               className="flex items-center space-x-1 text-gray-600 hover:text-green-600 transition-colors relative"
