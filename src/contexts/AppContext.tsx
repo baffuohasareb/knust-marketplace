@@ -10,6 +10,8 @@ interface AppState {
   conversations: ChatConversation[];
   notifications: Notification[];
   isAuthenticated: boolean;
+  userBusinesses: VendorBusiness[];
+  onboardingData: OnboardingData;
 }
 
 type AppAction =
@@ -26,7 +28,10 @@ type AppAction =
   | { type: 'UPDATE_CONVERSATION'; payload: ChatConversation }
   | { type: 'ADD_NOTIFICATION'; payload: Notification }
   | { type: 'MARK_NOTIFICATION_READ'; payload: string }
-  | { type: 'MARK_ALL_NOTIFICATIONS_READ' };
+  | { type: 'MARK_ALL_NOTIFICATIONS_READ' }
+  | { type: 'ADD_USER_BUSINESS'; payload: VendorBusiness }
+  | { type: 'UPDATE_ONBOARDING_DATA'; payload: Partial<OnboardingData> }
+  | { type: 'CLEAR_ONBOARDING_DATA' };
 
 const initialState: AppState = {
   user: null,
@@ -37,6 +42,29 @@ const initialState: AppState = {
   conversations: [],
   notifications: [],
   isAuthenticated: false,
+  userBusinesses: [],
+  onboardingData: {
+    businessType: '',
+    businessInfo: {
+      name: '',
+      description: '',
+      category: '',
+      tags: [],
+      logo: null,
+    },
+    contactInfo: {
+      hall: '',
+      room: '',
+      landmark: '',
+      phone: '',
+      whatsapp: '',
+    },
+    delivery: {
+      available: false,
+      fee: 0,
+      coverage: '',
+    },
+  },
 };
 
 const AppContext = createContext<{
@@ -163,6 +191,24 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         notifications: state.notifications.map(notif => ({ ...notif, read: true })),
+      };
+    case 'ADD_USER_BUSINESS':
+      return {
+        ...state,
+        userBusinesses: [...state.userBusinesses, action.payload],
+      };
+    case 'UPDATE_ONBOARDING_DATA':
+      return {
+        ...state,
+        onboardingData: {
+          ...state.onboardingData,
+          ...action.payload,
+        },
+      };
+    case 'CLEAR_ONBOARDING_DATA':
+      return {
+        ...state,
+        onboardingData: initialState.onboardingData,
       };
     default:
       return state;

@@ -153,3 +153,55 @@ export interface Report {
   createdAt: string;
   adminResponse?: string;
 }
+
+export interface VendorBusiness {
+  id: string;
+  ownerId: string;
+  name: string;
+  description: string;
+  logo: string;
+  businessType: 'goods' | 'services' | 'both';
+  category: string;
+  tags: string[];
+  contactInfo: {
+    hall: string;
+    room: string;
+    landmark?: string;
+    phone: string;
+    whatsapp?: string;
+  };
+  delivery: {
+    available: boolean;
+    fee?: number;
+    coverage?: string;
+  };
+  productCount: number;
+  rating?: number;
+  reviewCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OnboardingData {
+  businessType: 'goods' | 'services' | 'both' | '';
+  businessInfo: {
+    name: string;
+    description: string;
+    category: string;
+    tags: string[];
+    logo: File | null;
+  };
+  contactInfo: {
+    hall: string;
+    room: string;
+    landmark: string;
+    phone: string;
+    whatsapp: string;
+  };
+  delivery: {
+    available: boolean;
+    fee: number;
+    coverage: string;
+  };
+}

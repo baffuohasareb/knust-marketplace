@@ -18,6 +18,13 @@ import NotificationsPage from './pages/notifications/NotificationsPage';
 import ReportVendorPage from './pages/report/ReportVendorPage';
 import ReviewsPage from './pages/reviews/ReviewsPage';
 import WriteReviewPage from './pages/reviews/WriteReviewPage';
+import MyBusinessesPage from './pages/buyer/MyBusinessesPage';
+import OnboardingStartPage from './pages/vendor/OnboardingStartPage';
+import OnboardingTypePage from './pages/vendor/OnboardingTypePage';
+import OnboardingInfoPage from './pages/vendor/OnboardingInfoPage';
+import OnboardingContactPage from './pages/vendor/OnboardingContactPage';
+import OnboardingPreviewPage from './pages/vendor/OnboardingPreviewPage';
+import VendorDashboardPage from './pages/vendor/VendorDashboardPage';
 
 // Protected Route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -117,6 +124,49 @@ function AppContent() {
               <WriteReviewPage />
             </ProtectedRoute>
           } />
+          
+          <Route path="/buyer/my-businesses" element={
+            <ProtectedRoute>
+              <MyBusinessesPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/onboarding/start" element={
+            <ProtectedRoute>
+              <OnboardingStartPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/onboarding/type" element={
+            <ProtectedRoute>
+              <OnboardingTypePage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/onboarding/info" element={
+            <ProtectedRoute>
+              <OnboardingInfoPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/onboarding/contact" element={
+            <ProtectedRoute>
+              <OnboardingContactPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/onboarding/preview" element={
+            <ProtectedRoute>
+              <OnboardingPreviewPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/:vendorId/dashboard" element={
+            <ProtectedRoute>
+              <VendorDashboardPage />
+            </ProtectedRoute>
+          } />
+          
           {/* Placeholder routes for features mentioned in spec but not fully implemented */}
           <Route path="/buyer/orders" element={
             <ProtectedRoute>

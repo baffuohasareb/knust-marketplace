@@ -1,4 +1,5 @@
 import { Business, Product, Order, Review, ChatConversation, ChatMessage, Notification, OrderUpdate } from '../types';
+import type { VendorBusiness } from '../types';
 
 export const mockBusinesses: Business[] = [
   {
@@ -299,4 +300,91 @@ export const mockNotifications: Notification[] = [
     actionUrl: '/chat/1',
     businessId: '1'
   }
+];
+
+export const mockUserBusinesses: VendorBusiness[] = [
+  {
+    id: 'vb1',
+    ownerId: '1',
+    name: 'Campus Tech Solutions',
+    description: 'Laptop repairs, phone accessories, and tech support for students',
+    logo: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=200',
+    businessType: 'both',
+    category: 'Electronics & Tech',
+    tags: ['laptop repair', 'phone accessories', 'tech support'],
+    contactInfo: {
+      hall: 'Unity Hall',
+      room: 'A205',
+      landmark: 'Near the main entrance',
+      phone: '+233241234567',
+      whatsapp: '233241234567',
+    },
+    delivery: {
+      available: true,
+      fee: 5,
+      coverage: 'All halls on campus',
+    },
+    productCount: 15,
+    rating: 4.8,
+    reviewCount: 42,
+    isActive: true,
+    createdAt: '2024-01-15T10:30:00Z',
+    updatedAt: '2024-01-20T14:20:00Z',
+  },
+  {
+    id: 'vb2',
+    ownerId: '1',
+    name: 'Study Buddy Tutoring',
+    description: 'Mathematics and Engineering tutoring services',
+    logo: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=200',
+    businessType: 'services',
+    category: 'Education & Tutoring',
+    tags: ['mathematics', 'engineering', 'tutoring'],
+    contactInfo: {
+      hall: 'Katanga Hall',
+      room: 'B102',
+      phone: '+233247654321',
+      whatsapp: '233247654321',
+    },
+    delivery: {
+      available: false,
+    },
+    productCount: 0,
+    rating: 4.9,
+    reviewCount: 28,
+    isActive: true,
+    createdAt: '2024-01-10T08:15:00Z',
+    updatedAt: '2024-01-18T16:45:00Z',
+  },
+];
+
+export const businessCategories = [
+  'Electronics & Tech',
+  'Food & Beverages',
+  'Fashion & Clothing',
+  'Books & Stationery',
+  'Health & Beauty',
+  'Sports & Fitness',
+  'Education & Tutoring',
+  'Cleaning & Laundry',
+  'Transportation',
+  'Entertainment',
+  'Other Services',
+];
+
+export const knustHalls = [
+  'Unity Hall',
+  'Katanga Hall',
+  'Queen Elizabeth II Hall',
+  'Africa Hall',
+  'Ghana Hall',
+  'Jean Nelson Aka Hall',
+  'Liman Hall',
+  'Alexander Kwapong Hall',
+  'University Hall',
+  'Independence Hall',
+  'Republic Hall',
+  'Brunei Hall',
+  'Conti Hall',
+  'Off Campus',
 ];
