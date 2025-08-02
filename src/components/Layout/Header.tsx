@@ -46,7 +46,7 @@ export default function Header() {
               className="flex items-center space-x-1 text-gray-600 hover:text-green-600 transition-colors"
             >
               <Heart className="h-5 w-5" />
-              <span className="hidden sm:inline">Favorites</span>
+              <span className="hidden sm:inline">Saved</span>
             </Link>
 
             <Link

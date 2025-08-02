@@ -19,6 +19,7 @@ import ReportVendorPage from './pages/report/ReportVendorPage';
 import ReviewsPage from './pages/reviews/ReviewsPage';
 import WriteReviewPage from './pages/reviews/WriteReviewPage';
 import MyBusinessesPage from './pages/buyer/MyBusinessesPage';
+import SavedBusinessesPage from './pages/buyer/SavedBusinessesPage';
 import OnboardingStartPage from './pages/vendor/OnboardingStartPage';
 import OnboardingTypePage from './pages/vendor/OnboardingTypePage';
 import OnboardingInfoPage from './pages/vendor/OnboardingInfoPage';
@@ -182,13 +183,7 @@ function AppContent() {
           
           <Route path="/buyer/favorites" element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Favorites Page</h2>
-                  <p className="text-gray-600 mb-4">This feature will display your favorite businesses</p>
-                  <a href="/buyer/home" className="text-green-600 hover:text-green-700">Back to home</a>
-                </div>
-              </div>
+              <SavedBusinessesPage />
             </ProtectedRoute>
           } />
 

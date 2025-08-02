@@ -33,9 +33,6 @@ export default function LoginPage() {
         
         if (userType === 'buyer') {
           navigate('/buyer/home');
-        } else {
-          // For sellers, redirect to seller dashboard (not implemented in this spec)
-          alert('Seller dashboard not implemented in this demo');
         }
       } else {
         alert('Please use a valid KNUST email address');

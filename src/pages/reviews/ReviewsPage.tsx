@@ -5,11 +5,14 @@ import { useApp } from '../../contexts/AppContext';
 import { mockReviews } from '../../data/mockData';
 import ReviewCard from '../../components/Review/ReviewCard';
 import ReviewSummary from '../../components/Review/ReviewSummary';
+import EmptyState from '../../components/Common/EmptyState';
+import ErrorState from '../../components/Common/ErrorState';
 
 export default function ReviewsPage() {
   const { state } = useApp();
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
+  const [error, setError] = useState<string | null>(null);
 
   // Combine mock reviews with user reviews
   const allReviews = [...mockReviews, ...state.reviews];
@@ -145,22 +148,18 @@ export default function ReviewsPage() {
           {/* Reviews List */}
           <div className="lg:col-span-3">
             {filteredReviews.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-                <Star className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No reviews found</h3>
-                <p className="text-gray-600 mb-6">
-                  {filterRating ? `No reviews with ${filterRating} star${filterRating !== 1 ? 's' : ''} found.` : 'No reviews available yet.'}
-                </p>
-                {!filterRating && (
-                  <Link
-                    to="/reviews/write"
-                    className="inline-flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span>Write the first review</span>
-                  </Link>
-                )}
-              </div>
+              <EmptyState
+                icon={Star}
+                title="No reviews found"
+                description={
+                  filterRating 
+                    ? `No reviews with ${filterRating} star${filterRating !== 1 ? 's' : ''} found.`
+                    : 'No reviews available yet.'
+                }
+                actionText={!filterRating ? "Write the first review" : "Clear filter"}
+                actionLink={!filterRating ? "/reviews/write" : undefined}
+                onAction={filterRating ? () => setFilterRating(null) : undefined}
+              />
             ) : (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

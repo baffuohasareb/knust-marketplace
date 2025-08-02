@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Search, Filter, MapPin, TrendingUp, Percent, Clock } from 'lucide-react';
 import BusinessCard from '../../components/Business/BusinessCard';
+import EmptyState from '../../components/Common/EmptyState';
+import ErrorState from '../../components/Common/ErrorState';
 import { mockBusinesses } from '../../data/mockData';
 
 export default function BuyerHomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const categories = ['all', 'Electronics', 'Food', 'Stationery', 'Books', 'Beverages', 'Accessories'];
 
@@ -16,6 +20,17 @@ export default function BuyerHomePage() {
                            business.categories.some(cat => cat === selectedCategory);
     return matchesSearch && matchesCategory;
   });
+
+  const handleRetry = () => {
+    setError(null);
+    setIsLoading(true);
+    // Simulate retry
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  if (error) return <ErrorState type="network" onRetry={handleRetry} />;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -59,11 +74,24 @@ export default function BuyerHomePage() {
               <TrendingUp className="h-6 w-6 text-green-600 mr-3" />
               <h2 className="text-2xl font-bold text-gray-900">Most Viewed Businesses</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBusinesses.slice(0, 3).map((business) => (
-                <BusinessCard key={business.id} business={business} />
-              ))}
-            </div>
+            {filteredBusinesses.length === 0 ? (
+              <EmptyState
+                icon={TrendingUp}
+                title="No businesses found"
+                description={searchQuery ? `No businesses match "${searchQuery}"` : "No businesses available in this category"}
+                actionText="Clear Search"
+                onAction={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                }}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredBusinesses.slice(0, 3).map((business) => (
+                  <BusinessCard key={business.id} business={business} />
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Businesses with Discounts */}

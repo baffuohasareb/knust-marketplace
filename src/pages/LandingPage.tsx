@@ -21,40 +21,22 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+          {/* Sign In Button */}
+          <div className="mb-16">
             <Link
               to="/login/buyer"
-              className="group w-full sm:w-auto"
+              className="inline-block group"
             >
-              <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group-hover:border-green-300">
-                <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
-                  <ShoppingBag className="h-8 w-8 text-green-600" />
+              <div className="bg-white rounded-2xl p-10 shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 group-hover:border-green-300 max-w-md mx-auto">
+                <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
+                  <ShoppingBag className="h-10 w-10 text-green-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Sign in as Buyer</h3>
-                <p className="text-gray-600 mb-4">
-                  Discover and purchase from campus businesses
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Welcome to KNUST Marketplace</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Sign in with your KNUST credentials to start shopping, selling, and connecting with fellow students
                 </p>
-                <div className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium group-hover:bg-green-700 transition-colors">
-                  Start Shopping
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              to="/login/seller"
-              className="group w-full sm:w-auto"
-            >
-              <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group-hover:border-green-300">
-                <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
-                  <Store className="h-8 w-8 text-green-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Sign in as Seller</h3>
-                <p className="text-gray-600 mb-4">
-                  Sell your products and services to students
-                </p>
-                <div className="bg-gray-800 text-white px-6 py-3 rounded-lg font-medium group-hover:bg-gray-900 transition-colors">
-                  Start Selling
+                <div className="bg-green-600 text-white px-8 py-4 rounded-xl font-semibold text-lg group-hover:bg-green-700 transition-colors shadow-lg">
+                  Sign In with KNUST Account
                 </div>
               </div>
             </Link>
