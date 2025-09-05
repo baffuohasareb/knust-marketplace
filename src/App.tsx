@@ -26,6 +26,9 @@ import OnboardingInfoPage from './pages/vendor/OnboardingInfoPage';
 import OnboardingContactPage from './pages/vendor/OnboardingContactPage';
 import OnboardingPreviewPage from './pages/vendor/OnboardingPreviewPage';
 import VendorDashboardPage from './pages/vendor/VendorDashboardPage';
+import AddProductPage from './pages/vendor/AddProductPage';
+import ManageOrdersPage from './pages/vendor/ManageOrdersPage';
+import AnalyticsPage from './pages/vendor/AnalyticsPage';
 
 // Protected Route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -165,6 +168,24 @@ function AppContent() {
           <Route path="/vendor/:vendorId/dashboard" element={
             <ProtectedRoute>
               <VendorDashboardPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/:vendorId/products/add" element={
+            <ProtectedRoute>
+              <AddProductPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/:vendorId/orders" element={
+            <ProtectedRoute>
+              <ManageOrdersPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/vendor/:vendorId/analytics" element={
+            <ProtectedRoute>
+              <AnalyticsPage />
             </ProtectedRoute>
           } />
           

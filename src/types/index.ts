@@ -183,6 +183,67 @@ export interface VendorBusiness {
   updatedAt: string;
 }
 
+export interface VendorProduct {
+  id: string;
+  businessId: string;
+  name: string;
+  description: string;
+  price: number;
+  images: string[];
+  category: string;
+  stock: number;
+  isActive: boolean;
+  options?: {
+    sizes?: string[];
+    colors?: string[];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VendorOrder {
+  id: string;
+  businessId: string;
+  customerId: string;
+  customerName: string;
+  items: CartItem[];
+  total: number;
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'out-for-delivery' | 'delivered' | 'cancelled';
+  createdAt: string;
+  updatedAt?: string;
+  deliveryInfo: {
+    hall: string;
+    room: string;
+    landmark?: string;
+  };
+  paymentMethod: string;
+  customerContact: string;
+}
+
+export interface BusinessAnalytics {
+  businessId: string;
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  topProducts: {
+    productId: string;
+    name: string;
+    sales: number;
+    revenue: number;
+  }[];
+  recentOrders: VendorOrder[];
+  monthlyStats: {
+    month: string;
+    orders: number;
+    revenue: number;
+  }[];
+  customerStats: {
+    totalCustomers: number;
+    returningCustomers: number;
+    newCustomers: number;
+  };
+}
+
 export interface OnboardingData {
   businessType: 'goods' | 'services' | 'both' | '';
   businessInfo: {

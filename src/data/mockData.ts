@@ -1,5 +1,5 @@
 import { Business, Product, Order, Review, ChatConversation, ChatMessage, Notification, OrderUpdate } from '../types';
-import type { VendorBusiness } from '../types';
+import type { VendorBusiness, VendorProduct, VendorOrder, BusinessAnalytics } from '../types';
 
 export const mockBusinesses: Business[] = [
   {
@@ -357,6 +357,145 @@ export const mockUserBusinesses: VendorBusiness[] = [
     updatedAt: '2024-01-18T16:45:00Z',
   },
 ];
+
+export const mockVendorProducts: VendorProduct[] = [
+  {
+    id: 'vp1',
+    businessId: 'vb1',
+    name: 'Laptop Screen Repair',
+    description: 'Professional laptop screen replacement service with 6-month warranty',
+    price: 250,
+    images: [
+      'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg?auto=compress&cs=tinysrgb&w=400'
+    ],
+    category: 'Electronics & Tech',
+    stock: 10,
+    isActive: true,
+    createdAt: '2024-01-15T10:30:00Z',
+    updatedAt: '2024-01-20T14:20:00Z',
+  },
+  {
+    id: 'vp2',
+    businessId: 'vb1',
+    name: 'Phone Case - iPhone 15',
+    description: 'Durable protective case for iPhone 15 with shock absorption',
+    price: 35,
+    images: [
+      'https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg?auto=compress&cs=tinysrgb&w=400'
+    ],
+    category: 'Electronics & Tech',
+    stock: 25,
+    isActive: true,
+    options: {
+      colors: ['Black', 'Clear', 'Blue', 'Red']
+    },
+    createdAt: '2024-01-18T09:15:00Z',
+    updatedAt: '2024-01-20T11:30:00Z',
+  },
+  {
+    id: 'vp3',
+    businessId: 'vb2',
+    name: 'Mathematics Tutoring - 1 Hour',
+    description: 'One-on-one mathematics tutoring session for engineering students',
+    price: 20,
+    images: [
+      'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=400'
+    ],
+    category: 'Education & Tutoring',
+    stock: 50,
+    isActive: true,
+    createdAt: '2024-01-10T08:15:00Z',
+    updatedAt: '2024-01-19T16:45:00Z',
+  },
+];
+
+export const mockVendorOrders: VendorOrder[] = [
+  {
+    id: 'VO001',
+    businessId: 'vb1',
+    customerId: '2',
+    customerName: 'Jane Smith',
+    items: [
+      {
+        productId: 'vp2',
+        quantity: 1,
+        selectedColor: 'Black',
+        price: 35,
+        name: 'Phone Case - iPhone 15',
+        image: 'https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg?auto=compress&cs=tinysrgb&w=400',
+        businessName: 'Campus Tech Solutions'
+      }
+    ],
+    total: 35,
+    status: 'pending',
+    createdAt: '2024-01-20T14:30:00Z',
+    deliveryInfo: {
+      hall: 'Katanga Hall',
+      room: 'B205',
+      landmark: 'Near the cafeteria'
+    },
+    paymentMethod: 'MTN Mobile Money',
+    customerContact: '+233247654321'
+  },
+  {
+    id: 'VO002',
+    businessId: 'vb1',
+    customerId: '3',
+    customerName: 'Michael Johnson',
+    items: [
+      {
+        productId: 'vp1',
+        quantity: 1,
+        price: 250,
+        name: 'Laptop Screen Repair',
+        image: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400',
+        businessName: 'Campus Tech Solutions'
+      }
+    ],
+    total: 250,
+    status: 'confirmed',
+    createdAt: '2024-01-19T11:15:00Z',
+    updatedAt: '2024-01-19T12:00:00Z',
+    deliveryInfo: {
+      hall: 'Unity Hall',
+      room: 'A301'
+    },
+    paymentMethod: 'Vodafone Cash',
+    customerContact: '+233201234567'
+  }
+];
+
+export const mockBusinessAnalytics: BusinessAnalytics = {
+  businessId: 'vb1',
+  totalOrders: 15,
+  totalRevenue: 1250,
+  averageOrderValue: 83.33,
+  topProducts: [
+    {
+      productId: 'vp1',
+      name: 'Laptop Screen Repair',
+      sales: 8,
+      revenue: 2000
+    },
+    {
+      productId: 'vp2',
+      name: 'Phone Case - iPhone 15',
+      sales: 12,
+      revenue: 420
+    }
+  ],
+  recentOrders: mockVendorOrders,
+  monthlyStats: [
+    { month: 'Dec 2023', orders: 5, revenue: 400 },
+    { month: 'Jan 2024', orders: 10, revenue: 850 }
+  ],
+  customerStats: {
+    totalCustomers: 12,
+    returningCustomers: 3,
+    newCustomers: 9
+  }
+};
 
 export const businessCategories = [
   'Electronics & Tech',
