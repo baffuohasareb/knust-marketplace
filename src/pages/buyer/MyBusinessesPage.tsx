@@ -73,7 +73,7 @@ export default function MyBusinessesPage() {
 
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Businesses</h1>
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">My Businesses</h1>
             <p className="text-gray-600 mt-1">
               All active businesses on the app ({userBusinesses.length})
             </p>
@@ -81,10 +81,10 @@ export default function MyBusinessesPage() {
           
           <Link
             to="/vendor/onboarding/start"
-            className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+            className="flex items-center space-x-2 bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition-colors shadow-sm"
           >
             <Plus className="h-5 w-5" />
-            <span>Add New Business</span>
+            <span className="text-sm">Add New Business</span>
           </Link>
         </div>
 

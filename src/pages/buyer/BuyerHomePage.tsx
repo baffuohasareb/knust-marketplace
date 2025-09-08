@@ -88,7 +88,7 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <TrendingUp className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Most Viewed Businesses</h2>
+              <h2 className="text-lg lg:text-2xl font-bold text-gray-900">Most Viewed Businesses</h2>
             </div>
             {filteredBusinesses.length === 0 ? (
               <EmptyState
@@ -102,10 +102,16 @@ export default function BuyerHomePage() {
                 }}
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredBusinesses.slice(0, 3).map((business) => (
-                  <BusinessCard key={business.id} business={business} />
-                ))}
+              <div className="-mx-4 sm:mx-0">
+                <div className="overflow-x-auto px-4 sm:px-0 scrollbar-hide">
+                  <div className="flex gap-4 snap-x snap-mandatory">
+                    {filteredBusinesses.slice(0, 3).map((business) => (
+                      <div key={business.id} className="snap-start shrink-0 w-72 sm:w-80 h-[22rem] sm:h-[24rem]">
+                        <BusinessCard business={business} className="h-full" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </section>
@@ -114,12 +120,18 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <Percent className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Special Offers & Discounts</h2>
+              <h2 className="text-lg lg:text-2xl font-bold text-gray-900">Special Offers & Discounts</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBusinesses.map((business) => (
-                <BusinessCard key={business.id} business={business} />
-              ))}
+            <div className="-mx-4 sm:mx-0">
+              <div className="overflow-x-auto px-4 sm:px-0 scrollbar-hide">
+                <div className="flex gap-4 snap-x snap-mandatory">
+                  {filteredBusinesses.map((business) => (
+                    <div key={business.id} className="snap-start shrink-0 w-72 sm:w-80 h-[22rem] sm:h-[24rem]">
+                      <BusinessCard business={business} className="h-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
 
@@ -127,12 +139,18 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <MapPin className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Closest to You</h2>
+              <h2 className="text-lg lg:text-2xl font-bold text-gray-900">Closest to You</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBusinesses.slice(0, 2).map((business) => (
-                <BusinessCard key={business.id} business={business} />
-              ))}
+            <div className="-mx-4 sm:mx-0">
+              <div className="overflow-x-auto px-4 sm:px-0 scrollbar-hide">
+                <div className="flex gap-4 snap-x snap-mandatory">
+                  {filteredBusinesses.slice(0, 2).map((business) => (
+                    <div key={business.id} className="snap-start shrink-0 w-72 sm:w-80 h-[22rem] sm:h-[24rem]">
+                      <BusinessCard business={business} className="h-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
 
@@ -140,12 +158,18 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <Clock className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Recently Active</h2>
+              <h2 className="text-lg lg:text-2xl font-bold text-gray-900">Recently Active</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredBusinesses.map((business) => (
-                <BusinessCard key={business.id} business={business} />
-              ))}
+            <div className="-mx-4 sm:mx-0">
+              <div className="overflow-x-auto px-4 sm:px-0 scrollbar-hide">
+                <div className="flex gap-4 snap-x snap-mandatory">
+                  {filteredBusinesses.map((business) => (
+                    <div key={business.id} className="snap-start shrink-0 w-72 sm:w-80 h-[22rem] sm:h-[24rem]">
+                      <BusinessCard business={business} className="h-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
         </div>
