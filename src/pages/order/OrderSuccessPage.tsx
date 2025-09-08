@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { CheckCircle, Package, MessageCircle } from 'lucide-react';
+import { CheckCircle, Package } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 
 export default function OrderSuccessPage() {

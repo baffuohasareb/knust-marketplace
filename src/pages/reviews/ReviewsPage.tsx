@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Filter, Star, Plus } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
@@ -6,13 +6,11 @@ import { mockReviews } from '../../data/mockData';
 import ReviewCard from '../../components/Review/ReviewCard';
 import ReviewSummary from '../../components/Review/ReviewSummary';
 import EmptyState from '../../components/Common/EmptyState';
-import ErrorState from '../../components/Common/ErrorState';
 
 export default function ReviewsPage() {
   const { state } = useApp();
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
-  const [error, setError] = useState<string | null>(null);
 
   // Combine mock reviews with user reviews
   const allReviews = [...mockReviews, ...state.reviews];

@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, Upload, X } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
 
 export default function ReportVendorPage() {
   const navigate = useNavigate();
-  const { state } = useApp();
   const [searchParams] = useSearchParams();
   
-  const businessId = searchParams.get('businessId');
   const orderId = searchParams.get('orderId');
   
   const [reportType, setReportType] = useState('');
