@@ -2,20 +2,28 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, MessageCircle, Minus, Plus } from 'lucide-react';
 import { mockProducts, mockBusinesses } from '../../data/mockData';
+import { useProductsStore } from '../../store/productsStore';
 import { useApp } from '../../contexts/AppContext';
+import SuccessModal from '../../components/Common/SuccessModal';
 
 export default function ProductDetailsPage() {
   const { productId } = useParams<{ productId: string }>();
   const { dispatch } = useApp();
+  const { products: storeProducts } = useProductsStore();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const product = mockProducts.find(p => p.id === productId);
+  const mergedProducts = [
+    ...storeProducts,
+    ...mockProducts,
+  ];
+  const product = mergedProducts.find(p => p.id === productId);
   const business = product ? mockBusinesses.find(b => b.id === product.businessId) : null;
 
-  if (!product || !business) {
+  if (!product) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -37,11 +45,12 @@ export default function ProductDetailsPage() {
       price: product.price,
       name: product.name,
       image: product.images[0],
-      businessName: business.name
+      businessName: business ? business.name : 'Seller',
+      businessId: product.businessId
     };
 
     dispatch({ type: 'ADD_TO_CART', payload: cartItem });
-    alert('Added to cart!');
+    setShowSuccess(true);
   };
 
   return (
@@ -49,11 +58,11 @@ export default function ProductDetailsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link
-          to={`/business/${business.id}`}
+          to={business ? `/business/${business.id}` : '/buyer/my-businesses'}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to {business.name}
+          {business ? `Back to ${business.name}` : 'Back to my businesses'}
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -109,12 +118,14 @@ export default function ProductDetailsPage() {
                     {product.stock > 10 ? 'In Stock' : product.stock > 0 ? `Only ${product.stock} left` : 'Out of Stock'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Sold by:</span>
-                  <Link to={`/business/${business.id}`} className="text-sm text-green-600 hover:text-green-700 font-medium">
-                    {business.name}
-                  </Link>
-                </div>
+                {business && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Sold by:</span>
+                    <Link to={`/business/${business.id}`} className="text-sm text-green-600 hover:text-green-700 font-medium">
+                      {business.name}
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {/* Options */}
@@ -200,13 +211,15 @@ export default function ProductDetailsPage() {
                   <span>Add to Cart</span>
                 </button>
 
-                <Link
-                  to={`/chat/${business.id}`}
-                  className="flex-1 flex items-center justify-center space-x-2 py-3 px-6 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                  <span>Chat with seller</span>
-                </Link>
+                {business && (
+                  <Link
+                    to={`/chat/${business.id}`}
+                    className="flex-1 flex items-center justify-center space-x-2 py-3 px-6 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    <span>Chat with seller</span>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -243,6 +256,12 @@ export default function ProductDetailsPage() {
           </div>
         </div>
       </div>
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        message="Added to cart"
+      />
     </div>
   );
 }

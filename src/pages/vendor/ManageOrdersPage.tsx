@@ -1,18 +1,52 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Package, Clock, CheckCircle, Truck, X, Phone, MessageCircle } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { mockVendorOrders } from '../../data/mockData';
+import { useOrdersStore } from '../../store/ordersStore';
+import { mockBusinesses } from '../../data/mockData';
+import type { VendorOrder } from '../../types';
 import EmptyState from '../../components/Common/EmptyState';
 
 export default function ManageOrdersPage() {
   const { vendorId } = useParams<{ vendorId: string }>();
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
+  const ordersStore = useOrdersStore();
+  const storeVendorOrders = ordersStore.vendorOrders as VendorOrder[];
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  // const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
 
-  const business = state.userBusinesses.find(b => b.id === vendorId);
-  const orders = mockVendorOrders.filter(order => order.businessId === vendorId);
+  let business = state.userBusinesses.find(b => b.id === vendorId);
+  // Fallback: allow managing orders for marketplace businesses (ids like '1','2','3')
+  if (!business) {
+    const m = mockBusinesses.find(b => b.id === vendorId);
+    if (m) {
+      business = {
+        id: m.id,
+        ownerId: 'marketplace',
+        name: m.name,
+        description: m.description,
+        logo: m.logo,
+        businessType: 'both' as const,
+        category: m.categories?.[0] || m.location || 'General',
+        tags: m.categories || [],
+        contactInfo: { hall: m.location || '', room: '', landmark: '', phone: m.phone || '', whatsapp: m.whatsapp || '' },
+        delivery: { available: !!m.deliveryAvailable, fee: 0, coverage: '' },
+        productCount: m.totalSales || 0,
+        rating: m.rating,
+        reviewCount: m.reviewCount || 0,
+        isActive: true,
+        createdAt: m.joinedDate || new Date().toISOString(),
+        updatedAt: m.joinedDate || new Date().toISOString(),
+      } as any;
+    }
+  }
+  // Build acceptable business ids for this view (support vendor-owned id and marketplace id)
+  const linkedMarketplace = mockBusinesses.find((mb) => business && mb.name === business.name);
+  const businessIdSet = new Set<string>();
+  if (vendorId) businessIdSet.add(vendorId);
+  if (linkedMarketplace) businessIdSet.add(linkedMarketplace.id);
+
+  const orders = (storeVendorOrders).filter(order => businessIdSet.has(order.businessId));
 
   const filteredOrders = selectedStatus === 'all' 
     ? orders 
@@ -67,8 +101,43 @@ export default function ManageOrdersPage() {
   };
 
   const handleStatusUpdate = (orderId: string, newStatus: string) => {
-    // In a real app, this would update the backend
-    alert(`Order ${orderId} status updated to ${newStatus}`);
+    // Update in both Zustand and Context to keep legacy consumers in sync
+    ordersStore.updateVendorOrderStatus(orderId, newStatus as any);
+    dispatch({ type: 'UPDATE_VENDOR_ORDER_STATUS', payload: { orderId, status: newStatus as any } });
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      const statusText = newStatus.replace(/-/g, ' ');
+      const title = `Order ${order.id} ${statusText}`;
+      const message = `Your order at ${business?.name || 'the vendor'} is now "${statusText}".`;
+      dispatch({
+        type: 'ADD_NOTIFICATION',
+        payload: {
+          id: `N${Date.now()}`,
+          userId: order.customerId, // for demo, NotificationsPage shows all
+          type: 'order_update',
+          title,
+          message,
+          read: false,
+          createdAt: new Date().toISOString(),
+          // we don't have the buyer orderId mapping here; leaving actionUrl undefined
+        },
+      });
+
+      // Sync buyer order status if we have the mapping
+      const buyerOrderId = (order as any).buyerOrderId as string | undefined;
+      if (buyerOrderId) {
+        const update = {
+          id: `U${Date.now()}`,
+          status: newStatus as any,
+          message: `Seller updated status to ${statusText}`,
+          timestamp: new Date().toISOString(),
+        };
+        // Update AppContext order
+        dispatch({ type: 'UPDATE_ORDER_STATUS', payload: { orderId: buyerOrderId, status: newStatus as any, update } as any });
+        // Update persisted order store
+        ordersStore.updateOrderStatus(buyerOrderId, newStatus as any, { trackingUpdates: [update] } as any);
+      }
+    }
   };
 
   if (!business) {

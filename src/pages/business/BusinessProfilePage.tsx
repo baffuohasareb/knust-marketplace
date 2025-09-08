@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Phone, MessageCircle, Star, MapPin, Heart, ArrowLeft, ExternalLink, Flag, Calendar, TrendingUp, Shield, Clock } from 'lucide-react';
 import { mockBusinesses, mockProducts, mockReviews } from '../../data/mockData';
+import { useProductsStore } from '../../store/productsStore';
+
 import ProductCard from '../../components/Product/ProductCard';
 import ReviewCard from '../../components/Review/ReviewCard';
 import ReviewSummary from '../../components/Review/ReviewSummary';
@@ -11,9 +13,16 @@ export default function BusinessProfilePage() {
   const { businessId } = useParams<{ businessId: string }>();
   const { state, dispatch } = useApp();
   const [activeTab, setActiveTab] = useState('products');
+  const { products: storeProducts } = useProductsStore();
 
   const business = mockBusinesses.find(b => b.id === businessId);
-  const businessProducts = mockProducts.filter(p => p.businessId === businessId);
+  // Merge persisted products with mock, de-dup by id
+  const mergedProducts = [
+    ...storeProducts.filter(p => p.businessId === businessId),
+    ...mockProducts.filter(p => p.businessId === businessId)
+  ];
+  const businessProducts = Array.from(new Map(mergedProducts.map(p => [p.id, p])).values());
+
   const businessReviews = [...mockReviews, ...state.reviews].filter(r => r.businessId === businessId);
   const isFavorite = state.favorites.some(fav => fav.id === businessId);
 

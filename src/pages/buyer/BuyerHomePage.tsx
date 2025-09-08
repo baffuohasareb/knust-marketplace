@@ -34,7 +34,7 @@ export default function BuyerHomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Search Section */}
         <div className="mb-8">
           <div className="relative max-w-2xl mx-auto">
@@ -44,26 +44,31 @@ export default function BuyerHomePage() {
               placeholder="Search for businesses, products, or services..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+              className="w-full pl-12 pr-4 py-2.5 bg-white border outline-none border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-md lg:text-lg"
             />
           </div>
           
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-2 mt-4 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-700'
-                }`}
-              >
-                {category === 'all' ? 'All Categories' : category}
-              </button>
-            ))}
+          {/* Category Filters - Horizontal Scroll (Carousel-like) */}
+          <div className="mt-4 -mx-4 sm:mx-0">
+            <div className="overflow-x-auto px-4 sm:px-0">
+              <div className="inline-flex gap-2 whitespace-nowrap snap-x snap-mandatory">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors snap-start ${
+                      selectedCategory === category
+                        ? 'bg-green-600 text-white'
+                        : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-700'
+                    }`}
+                  >
+                    {category === 'all' ? 'All Categories' : category}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+
         </div>
 
         {/* Section Headers */}

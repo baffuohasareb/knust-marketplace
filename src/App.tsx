@@ -27,8 +27,14 @@ import OnboardingContactPage from './pages/vendor/OnboardingContactPage';
 import OnboardingPreviewPage from './pages/vendor/OnboardingPreviewPage';
 import VendorDashboardPage from './pages/vendor/VendorDashboardPage';
 import AddProductPage from './pages/vendor/AddProductPage';
+import ManageProductsPage from './pages/vendor/ManageProductsPage';
+import EditProductPage from './pages/vendor/EditProductPage';
 import ManageOrdersPage from './pages/vendor/ManageOrdersPage';
 import AnalyticsPage from './pages/vendor/AnalyticsPage';
+import OrdersPage from './pages/buyer/OrdersPage';
+import ProfilePage from './pages/profile/ProfilePage';
+import { useOrdersStore } from './store/ordersStore';
+import ScrollToTop from './components/Common/ScrollToTop';
 
 // Protected Route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -45,48 +51,51 @@ function AppContent() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
+        <ScrollToTop />
         <Header />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login/:userType" element={<LoginPage />} />
-          
-          {/* Protected Buyer Routes */}
-          <Route path="/buyer/home" element={
-            <ProtectedRoute>
-              <BuyerHomePage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/business/:businessId" element={
-            <ProtectedRoute>
-              <BusinessProfilePage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/product/:productId" element={
-            <ProtectedRoute>
-              <ProductDetailsPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/cart" element={
-            <ProtectedRoute>
-              <CartPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/checkout" element={
-            <ProtectedRoute>
-              <CheckoutPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/order/:orderId/success" element={
-            <ProtectedRoute>
-              <OrderSuccessPage />
-            </ProtectedRoute>
-          } />
-
+        <div className="pt-16 pb-20">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login/:userType" element={<LoginPage />} />
+            
+            {/* Protected Buyer Routes */}
+            <Route path="/buyer/home" element={
+              <ProtectedRoute>
+                <BuyerHomePage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/business/:businessId" element={
+              <ProtectedRoute>
+                <BusinessProfilePage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/product/:productId" element={
+              <ProtectedRoute>
+                <ProductDetailsPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/cart" element={
+              <ProtectedRoute>
+                <CartPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/checkout" element={
+              <ProtectedRoute>
+                <CheckoutPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/order/:orderId/success" element={
+              <ProtectedRoute>
+                <OrderSuccessPage />
+              </ProtectedRoute>
+            } />
+ 
+ 
           <Route path="/order/:orderId" element={
             <ProtectedRoute>
               <OrderTrackingPage />
@@ -176,6 +185,16 @@ function AppContent() {
               <AddProductPage />
             </ProtectedRoute>
           } />
+          <Route path="/vendor/:vendorId/products" element={
+            <ProtectedRoute>
+              <ManageProductsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/vendor/:vendorId/products/:productId/edit" element={
+            <ProtectedRoute>
+              <EditProductPage />
+            </ProtectedRoute>
+          } />
           
           <Route path="/vendor/:vendorId/orders" element={
             <ProtectedRoute>
@@ -192,13 +211,7 @@ function AppContent() {
           {/* Placeholder routes for features mentioned in spec but not fully implemented */}
           <Route path="/buyer/orders" element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Orders Page</h2>
-                  <p className="text-gray-600 mb-4">This feature will display your order history</p>
-                  <a href="/buyer/home" className="text-green-600 hover:text-green-700">Back to home</a>
-                </div>
-              </div>
+              <OrdersPage />
             </ProtectedRoute>
           } />
           
@@ -208,15 +221,12 @@ function AppContent() {
             </ProtectedRoute>
           } />
 
+          {/* Dev utility: clear orders and vendor orders */}
+          <Route path="/dev/clear-orders" element={<ClearOrdersDev />} />
+
           <Route path="/profile" element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Page</h2>
-                  <p className="text-gray-600 mb-4">This feature will display your profile information</p>
-                  <a href="/buyer/home" className="text-green-600 hover:text-green-700">Back to home</a>
-                </div>
-              </div>
+              <ProfilePage />
             </ProtectedRoute>
           } />
 
@@ -224,8 +234,18 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      </div>
     </Router>
   );
+}
+
+function ClearOrdersDev() {
+  const { dispatch } = useApp();
+  const ordersStore = useOrdersStore();
+  // clear both stores immediately
+  ordersStore.clearAll();
+  dispatch({ type: 'CLEAR_ALL_ORDERS' });
+  return <Navigate to="/" replace />;
 }
 
 function App() {

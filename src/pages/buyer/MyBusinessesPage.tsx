@@ -1,14 +1,38 @@
-import React from 'react';
+import {} from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Star, Package, BarChart3, Settings } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { mockUserBusinesses } from '../../data/mockData';
+import { mockBusinesses } from '../../data/mockData';
 
 export default function MyBusinessesPage() {
   const { state } = useApp();
 
-  // In a real app, this would come from the backend
-  const userBusinesses = mockUserBusinesses;
+  // Build a combined list: marketplace businesses (what buyers see) + user's vendor businesses (owned)
+  // Map marketplace businesses to the minimal shape we display here
+  const marketplaceAsVendorShape = mockBusinesses.map((b) => ({
+    id: b.id, // keep same id so dashboard resolves
+    ownerId: 'marketplace',
+    name: b.name,
+    description: b.description,
+    logo: b.logo,
+    businessType: 'both' as const,
+    category: b.categories?.[0] || b.location || 'General',
+    tags: b.categories || [],
+    contactInfo: { hall: b.location || '', room: '', landmark: '', phone: b.phone || '', whatsapp: b.whatsapp || '' },
+    delivery: { available: !!b.deliveryAvailable, fee: 0, coverage: '' },
+    productCount: b.totalSales || 0,
+    rating: b.rating,
+    reviewCount: b.reviewCount || 0,
+    isActive: true,
+    createdAt: b.joinedDate || new Date().toISOString(),
+    updatedAt: b.joinedDate || new Date().toISOString(),
+    __source: 'marketplace' as const,
+  }));
+
+  const userVendors = (state.userBusinesses || []).map((u) => ({ ...u, __source: 'owned' as const }));
+
+  // Show both lists side-by-side, filter active only
+  const userBusinesses = [...userVendors.filter(b => b.isActive), ...marketplaceAsVendorShape.filter(b => b.isActive)];
 
   const getBusinessTypeLabel = (type: string) => {
     switch (type) {
@@ -51,7 +75,7 @@ export default function MyBusinessesPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Businesses</h1>
             <p className="text-gray-600 mt-1">
-              Manage your {userBusinesses.length} business{userBusinesses.length !== 1 ? 'es' : ''}
+              All active businesses on the app ({userBusinesses.length})
             </p>
           </div>
           
@@ -148,12 +172,14 @@ export default function MyBusinessesPage() {
                     >
                       Open Dashboard
                     </Link>
-                    <Link
-                      to={`/vendor/${business.id}/settings`}
-                      className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      <Settings className="h-5 w-5" />
-                    </Link>
+                    {business.__source === 'owned' && (
+                      <Link
+                        to={`/vendor/${business.id}/settings`}
+                        className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        <Settings className="h-5 w-5" />
+                      </Link>
+                    )}
                   </div>
                 </div>
 
@@ -161,10 +187,15 @@ export default function MyBusinessesPage() {
                   business.isActive ? 'bg-green-50' : 'bg-red-50'
                 }`}>
                   <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${
-                      business.isActive ? 'text-green-800' : 'text-red-800'
-                    }`}>
-                      {business.isActive ? 'Active' : 'Inactive'}
+                    <span className="text-sm font-medium flex items-center gap-2">
+                      <span className={`${business.isActive ? 'text-green-800' : 'text-red-800'}`}>
+                        {business.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                      {business.__source === 'owned' ? (
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800">Owned</span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">Marketplace</span>
+                      )}
                     </span>
                     <span className="text-xs text-gray-500">
                       Updated {new Date(business.updatedAt).toLocaleDateString()}
