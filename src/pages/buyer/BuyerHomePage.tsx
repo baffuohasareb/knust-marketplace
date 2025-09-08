@@ -61,7 +61,7 @@ export default function BuyerHomePage() {
           
           {/* Category Filters - Horizontal Scroll (Carousel-like) */}
           <div className="mt-4 -mx-4 sm:mx-0">
-            <div className="overflow-x-auto px-4 sm:px-0 no-scrollbar">
+            <div className="overflow-x-auto px-4 sm:px-0 scrollbar-hide">
               <div className="inline-flex gap-2 whitespace-nowrap snap-x snap-mandatory">
                 {categories.map((category) => (
                   <button
