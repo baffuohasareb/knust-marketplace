@@ -105,8 +105,8 @@ export default function VendorDashboardPage() {
         </div>
 
         {/* Business Header */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8">
-          <div className="flex items-start space-x-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 lg:p-8 mb-8">
+          <div className="flex flex-col items-center lg:flex-row space-x-6 ">
             <img
               src={business.logo}
               alt={business.name}
@@ -114,7 +114,7 @@ export default function VendorDashboardPage() {
             />
             <div className="flex-1">
               <div className="flex items-center justify-between mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{business.name}</h1>
+                <h1 className="text-xl lg:text-3xl font-bold text-center lg:text-left  text-gray-900">{business.name}</h1>
                 <Link
                   to={`/vendor/${business.id}/settings`}
                   className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
