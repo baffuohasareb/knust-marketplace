@@ -53,7 +53,7 @@ function AppContent() {
       <div className="min-h-screen bg-gray-50">
         <ScrollToTop />
         <Header />
-        <div className="pt-16 pb-20">
+        <div className="pt-0 pb-20">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login/:userType" element={<LoginPage />} />
