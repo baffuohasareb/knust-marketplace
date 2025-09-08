@@ -90,7 +90,7 @@ export default function ManageOrdersPage() {
         return 'text-blue-600 bg-blue-100';
       case 'ready':
       case 'out-for-delivery':
-        return 'text-orange-600 bg-orange-100';
+        return 'text-orange-600 bg-orange-100 whitespace-nowrap';
       case 'delivered':
         return 'text-green-600 bg-green-100';
       case 'cancelled':
@@ -222,7 +222,7 @@ export default function ManageOrdersPage() {
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">Order #{order.id}</h3>
+                          <h3 className="text-md font-semibold text-gray-900">Order #{order.id}</h3>
                           <p className="text-sm text-gray-600">
                             {order.customerName} • {new Date(order.createdAt).toLocaleDateString()}
                           </p>

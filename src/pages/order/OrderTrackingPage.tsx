@@ -75,7 +75,7 @@ export default function OrderTrackingPage() {
         return 'text-blue-600 bg-blue-100';
       case 'ready':
       case 'out-for-delivery':
-        return 'text-orange-600 bg-orange-100';
+        return 'text-orange-600 bg-orange-100 whitespace-nowrap';
       case 'delivered':
         return 'text-green-600 bg-green-100';
       case 'cancelled':
