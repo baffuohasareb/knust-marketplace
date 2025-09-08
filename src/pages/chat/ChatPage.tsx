@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Image, Paperclip, Phone, Video, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Send, Image, Paperclip, Phone, MoreVertical } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { mockConversations, mockMessages, mockBusinesses } from '../../data/mockData';
 
@@ -8,6 +8,7 @@ export default function ChatPage() {
   const { vendorId } = useParams<{ vendorId?: string }>();
   const { state } = useApp();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(vendorId || null);
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState(mockMessages);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -43,10 +44,10 @@ export default function ChatPage() {
   if (!vendorId && conversations.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
           <Link
             to="/buyer/home"
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            className="hidden sm:flex items-center text-gray-600 hover:text-gray-900 mb-4 sm:mb-6 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to home
@@ -72,28 +73,28 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <Link
           to="/buyer/home"
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="hidden sm:flex items-center text-gray-600 hover:text-gray-900 mb-4 sm:mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to home
         </Link>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-[600px] flex">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex h-[75vh] sm:h-[600px]">
           {/* Conversations List */}
           {!vendorId && (
-            <div className="w-1/3 border-r border-gray-200 flex flex-col">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
+            <div className={`${selectedConversation ? 'hidden lg:flex' : 'flex'} w-full lg:w-1/3 border-r border-gray-200 flex-col`}>
+              <div className="p-3 sm:p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900">Messages</h2>
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto no-scrollbar">
                 {conversations.map((conversation) => (
                   <button
                     key={conversation.id}
                     onClick={() => setSelectedConversation(conversation.id)}
-                    className={`w-full p-4 text-left hover:bg-gray-50 border-b border-gray-100 transition-colors ${
+                    className={`w-full p-3 sm:p-4 text-left hover:bg-gray-50 border-b border-gray-100 transition-colors ${
                       selectedConversation === conversation.id ? 'bg-green-50 border-green-200' : ''
                     }`}
                   >
@@ -101,7 +102,7 @@ export default function ChatPage() {
                       <img
                         src={conversation.businessLogo}
                         alt={conversation.businessName}
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 truncate">{conversation.businessName}</p>
@@ -126,8 +127,17 @@ export default function ChatPage() {
             {currentConversation && currentBusiness ? (
               <>
                 {/* Chat Header */}
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
                   <div className="flex items-center space-x-3">
+                    {!vendorId && (
+                      <button
+                        className="mr-1 lg:hidden p-2 -ml-2 text-gray-600 hover:text-green-600"
+                        onClick={() => setSelectedConversation(null)}
+                        aria-label="Back to conversations"
+                      >
+                        <ArrowLeft className="h-5 w-5" />
+                      </button>
+                    )}
                     <img
                       src={currentBusiness.logo}
                       alt={currentBusiness.name}
@@ -156,21 +166,21 @@ export default function ChatPage() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 no-scrollbar bg-gray-50/50">
                   {messages.map((msg) => (
                     <div
                       key={msg.id}
                       className={`flex ${msg.senderType === 'buyer' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        className={`max-w-[80%] sm:max-w-md px-3 sm:px-4 py-2 rounded-2xl ${
                           msg.senderType === 'buyer'
                             ? 'bg-green-600 text-white'
                             : 'bg-gray-100 text-gray-900'
                         }`}
                       >
-                        <p className="text-sm">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${
+                        <p className="text-sm leading-relaxed">{msg.message}</p>
+                        <p className={`text-[10px] sm:text-xs mt-1 ${
                           msg.senderType === 'buyer' ? 'text-green-100' : 'text-gray-500'
                         }`}>
                           {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -182,7 +192,7 @@ export default function ChatPage() {
                 </div>
 
                 {/* Message Input */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
+                <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t border-gray-200 sticky bottom-0 bg-white">
                   <div className="flex items-center space-x-2">
                     <button
                       type="button"
@@ -201,12 +211,12 @@ export default function ChatPage() {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Type a message..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                     />
                     <button
                       type="submit"
                       disabled={!message.trim()}
-                      className={`p-2 rounded-lg transition-colors ${
+                      className={`p-2 rounded-full transition-colors ${
                         message.trim()
                           ? 'bg-green-600 text-white hover:bg-green-700'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'

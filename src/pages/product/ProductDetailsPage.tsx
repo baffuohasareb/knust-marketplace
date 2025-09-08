@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Star, ShoppingCart, MessageCircle, Minus, Plus } from 'lucide-react';
 import { mockProducts, mockBusinesses } from '../../data/mockData';
@@ -24,7 +24,7 @@ export default function ProductDetailsPage() {
   const business = product ? mockBusinesses.find(b => b.id === product.businessId) : null;
 
   if (!product) {
-    return (
+    return (  
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h2>

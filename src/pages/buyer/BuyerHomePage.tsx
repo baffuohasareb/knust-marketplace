@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, MapPin, TrendingUp, Percent, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { Search, MapPin, TrendingUp, Percent, Clock } from 'lucide-react';
 import BusinessCard from '../../components/Business/BusinessCard';
 import EmptyState from '../../components/Common/EmptyState';
 import ErrorState from '../../components/Common/ErrorState';
@@ -32,6 +32,17 @@ export default function BuyerHomePage() {
 
   if (error) return <ErrorState type="network" onRetry={handleRetry} />;
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3 text-gray-600">
+          <div className="h-10 w-10 border-4 border-gray-200 border-t-green-600 rounded-full animate-spin" />
+          <p className="text-sm">Loading, please wait…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -50,7 +61,7 @@ export default function BuyerHomePage() {
           
           {/* Category Filters - Horizontal Scroll (Carousel-like) */}
           <div className="mt-4 -mx-4 sm:mx-0">
-            <div className="overflow-x-auto px-4 sm:px-0">
+            <div className="overflow-x-auto px-4 sm:px-0 no-scrollbar">
               <div className="inline-flex gap-2 whitespace-nowrap snap-x snap-mandatory">
                 {categories.map((category) => (
                   <button
