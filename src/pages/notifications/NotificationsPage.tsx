@@ -1,25 +1,35 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Bell, Package, MessageCircle, Star, AlertTriangle } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
-import { mockNotifications } from '../../data/mockData';
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  Bell,
+  Package,
+  MessageCircle,
+  Star,
+  AlertTriangle,
+} from "lucide-react";
+import { useStore } from "../../stores/useStore";
 
 export default function NotificationsPage() {
-  const { state, dispatch } = useApp();
-  
-  const notifications = [...mockNotifications, ...state.notifications].sort(
+  const notifications = useStore((state) => state.notifications);
+  const markNotificationRead = useStore((state) => state.markNotificationRead);
+  const markAllNotificationsRead = useStore(
+    (state) => state.markAllNotificationsRead
+  );
+
+  const sortedNotifications = [...notifications].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'order_update':
+      case "order_update":
         return <Package className="h-5 w-5" />;
-      case 'message':
+      case "message":
         return <MessageCircle className="h-5 w-5" />;
-      case 'review':
+      case "review":
         return <Star className="h-5 w-5" />;
-      case 'system':
+      case "system":
         return <AlertTriangle className="h-5 w-5" />;
       default:
         return <Bell className="h-5 w-5" />;
@@ -28,28 +38,28 @@ export default function NotificationsPage() {
 
   const getNotificationColor = (type: string) => {
     switch (type) {
-      case 'order_update':
-        return 'text-blue-600 bg-blue-100';
-      case 'message':
-        return 'text-green-600 bg-green-100';
-      case 'review':
-        return 'text-yellow-600 bg-yellow-100';
-      case 'system':
-        return 'text-red-600 bg-red-100';
+      case "order_update":
+        return "text-blue-600 bg-blue-100";
+      case "message":
+        return "text-green-600 bg-green-100";
+      case "review":
+        return "text-yellow-600 bg-yellow-100";
+      case "system":
+        return "text-red-600 bg-red-100";
       default:
-        return 'text-gray-600 bg-gray-100';
+        return "text-gray-600 bg-gray-100";
     }
   };
 
   const handleMarkAsRead = (notificationId: string) => {
-    dispatch({ type: 'MARK_NOTIFICATION_READ', payload: notificationId });
+    markNotificationRead(notificationId);
   };
 
   const handleMarkAllAsRead = () => {
-    dispatch({ type: 'MARK_ALL_NOTIFICATIONS_READ' });
+    markAllNotificationsRead();
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = sortedNotifications.filter((n) => !n.read).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,9 +75,14 @@ export default function NotificationsPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Notifications
+              </h1>
               {unreadCount > 0 && (
-                <p className="text-sm text-gray-600">{unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}</p>
+                <p className="text-sm text-gray-600">
+                  {unreadCount} unread notification
+                  {unreadCount !== 1 ? "s" : ""}
+                </p>
               )}
             </div>
             {unreadCount > 0 && (
@@ -80,42 +95,62 @@ export default function NotificationsPage() {
             )}
           </div>
 
-          {notifications.length === 0 ? (
+          {sortedNotifications.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Bell className="h-8 w-8 text-gray-400" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">No notifications yet</h2>
-              <p className="text-gray-600">You'll see updates about your orders and messages here</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                No notifications yet
+              </h2>
+              <p className="text-gray-600">
+                You'll see updates about your orders and messages here
+              </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {notifications.map((notification) => (
+              {sortedNotifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-6 hover:bg-gray-50 transition-colors ${
-                    !notification.read ? 'bg-blue-50' : ''
+                    !notification.read ? "bg-blue-50" : ""
                   }`}
                 >
                   <div className="flex items-start space-x-4">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(notification.type)}`}>
+                    <div
+                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(
+                        notification.type
+                      )}`}
+                    >
                       {getNotificationIcon(notification.type)}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className={`font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <h3
+                            className={`font-medium ${
+                              !notification.read
+                                ? "text-gray-900"
+                                : "text-gray-700"
+                            }`}
+                          >
                             {notification.title}
                           </h3>
-                          <p className={`mt-1 text-sm ${!notification.read ? 'text-gray-700' : 'text-gray-600'}`}>
+                          <p
+                            className={`mt-1 text-sm ${
+                              !notification.read
+                                ? "text-gray-700"
+                                : "text-gray-600"
+                            }`}
+                          >
                             {notification.message}
                           </p>
                           <p className="mt-2 text-xs text-gray-500">
                             {new Date(notification.createdAt).toLocaleString()}
                           </p>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2 ml-4">
                           {!notification.read && (
                             <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
@@ -130,7 +165,7 @@ export default function NotificationsPage() {
                           )}
                         </div>
                       </div>
-                      
+
                       {notification.actionUrl && (
                         <div className="mt-3">
                           <Link

@@ -1,36 +1,57 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Heart, Search, Filter, MapPin, Star, Trash2 } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
-import BusinessCard from '../../components/Business/BusinessCard';
-import EmptyState from '../../components/Common/EmptyState';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  Heart,
+  Search,
+  Filter,
+  MapPin,
+  Star,
+  Trash2,
+} from "lucide-react";
+import { useStore } from "../../stores/useStore";
+import BusinessCard from "../../components/Business/BusinessCard";
+import EmptyState from "../../components/Common/EmptyState";
 
 export default function SavedBusinessesPage() {
-  const { state, dispatch } = useApp();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const favorites = useStore((state) => state.favorites);
+  const toggleFavorite = useStore((state) => state.toggleFavorite);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const categories = ['all', 'Electronics', 'Food', 'Stationery', 'Books', 'Beverages', 'Accessories'];
+  const categories = [
+    "all",
+    "Electronics",
+    "Food",
+    "Stationery",
+    "Books",
+    "Beverages",
+    "Accessories",
+  ];
 
-  const filteredBusinesses = state.favorites.filter(business => {
-    const matchesSearch = business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         business.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || 
-                           business.categories.some(cat => cat === selectedCategory);
+  const filteredBusinesses = favorites.filter((business) => {
+    const matchesSearch =
+      business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      business.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" ||
+      business.categories.some((cat) => cat === selectedCategory);
     return matchesSearch && matchesCategory;
   });
 
   const handleRemoveFromFavorites = (businessId: string) => {
-    const business = state.favorites.find(b => b.id === businessId);
+    const business = favorites.find((b) => b.id === businessId);
     if (business) {
-      dispatch({ type: 'TOGGLE_FAVORITE', payload: business });
+      toggleFavorite(business);
     }
   };
 
   const clearAllFavorites = () => {
-    if (window.confirm('Are you sure you want to remove all saved businesses?')) {
-      state.favorites.forEach(business => {
-        dispatch({ type: 'TOGGLE_FAVORITE', payload: business });
+    if (
+      window.confirm("Are you sure you want to remove all saved businesses?")
+    ) {
+      favorites.forEach((business) => {
+        toggleFavorite(business);
       });
     }
   };
@@ -53,11 +74,12 @@ export default function SavedBusinessesPage() {
               <span>Saved Businesses</span>
             </h1>
             <p className="text-gray-600 mt-1">
-              {state.favorites.length} saved business{state.favorites.length !== 1 ? 'es' : ''}
+              {favorites.length} saved business
+              {favorites.length !== 1 ? "es" : ""}
             </p>
           </div>
-          
-          {state.favorites.length > 0 && (
+
+          {favorites.length > 0 && (
             <button
               onClick={clearAllFavorites}
               className="flex items-center space-x-2 text-red-600 hover:text-red-700 transition-colors"
@@ -68,7 +90,7 @@ export default function SavedBusinessesPage() {
           )}
         </div>
 
-        {state.favorites.length === 0 ? (
+        {favorites.length === 0 ? (
           <EmptyState
             icon={Heart}
             title="No saved businesses yet"
@@ -91,17 +113,19 @@ export default function SavedBusinessesPage() {
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Filter className="h-5 w-5 text-gray-400" />
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    title="Filter by category"
+                    aria-label="Filter by category"
                   >
                     {categories.map((category) => (
                       <option key={category} value={category}>
-                        {category === 'all' ? 'All Categories' : category}
+                        {category === "all" ? "All Categories" : category}
                       </option>
                     ))}
                   </select>
@@ -114,24 +138,27 @@ export default function SavedBusinessesPage() {
               <EmptyState
                 icon={Search}
                 title="No businesses found"
-                description={`No saved businesses match "${searchQuery}" in ${selectedCategory === 'all' ? 'any category' : selectedCategory}`}
+                description={`No saved businesses match "${searchQuery}" in ${
+                  selectedCategory === "all" ? "any category" : selectedCategory
+                }`}
                 actionText="Clear Search"
                 onAction={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('all');
+                  setSearchQuery("");
+                  setSelectedCategory("all");
                 }}
               />
             ) : (
               <>
                 <div className="flex items-center justify-between mb-6">
                   <p className="text-gray-600">
-                    Showing {filteredBusinesses.length} of {state.favorites.length} saved business{state.favorites.length !== 1 ? 'es' : ''}
+                    Showing {filteredBusinesses.length} of {favorites.length}{" "}
+                    saved business{favorites.length !== 1 ? "es" : ""}
                   </p>
-                  {(searchQuery || selectedCategory !== 'all') && (
+                  {(searchQuery || selectedCategory !== "all") && (
                     <button
                       onClick={() => {
-                        setSearchQuery('');
-                        setSelectedCategory('all');
+                        setSearchQuery("");
+                        setSelectedCategory("all");
                       }}
                       className="text-green-600 hover:text-green-700 text-sm font-medium"
                     >

@@ -29,6 +29,12 @@ export interface Business {
   isVerified?: boolean;
 }
 
+export interface ProductVariation {
+  id: string;
+  name: string;
+  values: string[];
+}
+
 export interface Product {
   id: string;
   businessId: string;
@@ -40,10 +46,26 @@ export interface Product {
   stock: number;
   rating: number;
   reviewCount: number;
+  variations?: ProductVariation[];
   options?: {
     sizes?: string[];
     colors?: string[];
   };
+  sku?: string;
+  weight?: number;
+  dimensions?: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  tags?: string[];
+  isActive: boolean;
+  allowBackorders: boolean;
+  trackQuantity: boolean;
+  isDigital: boolean;
+  requiresShipping: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CartItem {
@@ -61,7 +83,14 @@ export interface Order {
   id: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'out-for-delivery' | 'delivered' | 'cancelled';
+  status:
+    | "pending"
+    | "confirmed"
+    | "preparing"
+    | "ready"
+    | "out-for-delivery"
+    | "delivered"
+    | "cancelled";
   createdAt: string;
   updatedAt?: string;
   deliveryInfo: {
@@ -78,7 +107,7 @@ export interface Order {
 
 export interface OrderUpdate {
   id: string;
-  status: Order['status'];
+  status: Order["status"];
   message: string;
   timestamp: string;
   location?: string;
@@ -104,12 +133,12 @@ export interface ChatMessage {
   id: string;
   senderId: string;
   senderName: string;
-  senderType: 'buyer' | 'seller';
+  senderType: "buyer" | "seller";
   receiverId: string;
   message: string;
   timestamp: string;
   read: boolean;
-  type: 'text' | 'image' | 'order' | 'system';
+  type: "text" | "image" | "order" | "system";
   orderId?: string;
   imageUrl?: string;
 }
@@ -129,7 +158,7 @@ export interface ChatConversation {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'order_update' | 'message' | 'review' | 'system';
+  type: "order_update" | "message" | "review" | "system";
   title: string;
   message: string;
   read: boolean;
@@ -146,10 +175,16 @@ export interface Report {
   businessId: string;
   businessName: string;
   orderId?: string;
-  type: 'false_advertising' | 'poor_service' | 'delayed_delivery' | 'quality_issues' | 'inappropriate_behavior' | 'other';
+  type:
+    | "false_advertising"
+    | "poor_service"
+    | "delayed_delivery"
+    | "quality_issues"
+    | "inappropriate_behavior"
+    | "other";
   description: string;
   evidence?: string[];
-  status: 'pending' | 'investigating' | 'resolved' | 'dismissed';
+  status: "pending" | "investigating" | "resolved" | "dismissed";
   createdAt: string;
   adminResponse?: string;
 }
@@ -160,7 +195,7 @@ export interface VendorBusiness {
   name: string;
   description: string;
   logo: string;
-  businessType: 'goods' | 'services' | 'both';
+  businessType: "goods" | "services" | "both";
   category: string;
   tags: string[];
   contactInfo: {
@@ -193,10 +228,23 @@ export interface VendorProduct {
   category: string;
   stock: number;
   isActive: boolean;
+  variations?: ProductVariation[];
   options?: {
     sizes?: string[];
     colors?: string[];
   };
+  sku?: string;
+  weight?: number;
+  dimensions?: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  tags?: string[];
+  allowBackorders: boolean;
+  trackQuantity: boolean;
+  isDigital: boolean;
+  requiresShipping: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -208,7 +256,14 @@ export interface VendorOrder {
   customerName: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'out-for-delivery' | 'delivered' | 'cancelled';
+  status:
+    | "pending"
+    | "confirmed"
+    | "preparing"
+    | "ready"
+    | "out-for-delivery"
+    | "delivered"
+    | "cancelled";
   createdAt: string;
   updatedAt?: string;
   deliveryInfo: {
@@ -245,7 +300,7 @@ export interface BusinessAnalytics {
 }
 
 export interface OnboardingData {
-  businessType: 'goods' | 'services' | 'both' | '';
+  businessType: "goods" | "services" | "both" | "";
   businessInfo: {
     name: string;
     description: string;

@@ -1,38 +1,41 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Star, Package, BarChart3, Settings } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
-import { mockUserBusinesses } from '../../data/mockData';
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  Plus,
+  Star,
+  Package,
+  BarChart3,
+  Settings,
+} from "lucide-react";
+import { useStore } from "../../stores/useStore";
 
 export default function MyBusinessesPage() {
-  const { state } = useApp();
-
-  // In a real app, this would come from the backend
-  const userBusinesses = mockUserBusinesses;
+  const userBusinesses = useStore((state) => state.userBusinesses);
 
   const getBusinessTypeLabel = (type: string) => {
     switch (type) {
-      case 'goods':
-        return 'Goods';
-      case 'services':
-        return 'Services';
-      case 'both':
-        return 'Both';
+      case "goods":
+        return "Goods";
+      case "services":
+        return "Services";
+      case "both":
+        return "Both";
       default:
-        return 'Unknown';
+        return "Unknown";
     }
   };
 
   const getBusinessTypeColor = (type: string) => {
     switch (type) {
-      case 'goods':
-        return 'bg-blue-100 text-blue-800';
-      case 'services':
-        return 'bg-purple-100 text-purple-800';
-      case 'both':
-        return 'bg-green-100 text-green-800';
+      case "goods":
+        return "bg-blue-100 text-blue-800";
+      case "services":
+        return "bg-purple-100 text-purple-800";
+      case "both":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -51,10 +54,11 @@ export default function MyBusinessesPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">My Businesses</h1>
             <p className="text-gray-600 mt-1">
-              Manage your {userBusinesses.length} business{userBusinesses.length !== 1 ? 'es' : ''}
+              Manage your {userBusinesses.length} business
+              {userBusinesses.length !== 1 ? "es" : ""}
             </p>
           </div>
-          
+
           <Link
             to="/vendor/onboarding/start"
             className="flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors shadow-sm"
@@ -69,9 +73,12 @@ export default function MyBusinessesPage() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Package className="h-8 w-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No businesses yet</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              No businesses yet
+            </h2>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Start your entrepreneurial journey by creating your first business on the KNUST Marketplace
+              Start your entrepreneurial journey by creating your first business
+              on the KNUST Marketplace
             </p>
             <Link
               to="/vendor/onboarding/start"
@@ -103,7 +110,11 @@ export default function MyBusinessesPage() {
                         {business.description}
                       </p>
                       <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getBusinessTypeColor(business.businessType)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getBusinessTypeColor(
+                            business.businessType
+                          )}`}
+                        >
                           {getBusinessTypeLabel(business.businessType)}
                         </span>
                         <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
@@ -117,25 +128,29 @@ export default function MyBusinessesPage() {
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-1 mb-1">
                         <Package className="h-4 w-4 text-gray-400" />
-                        <span className="text-lg font-bold text-gray-900">{business.productCount}</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          {business.productCount}
+                        </span>
                       </div>
                       <p className="text-xs text-gray-600">Products</p>
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-1 mb-1">
                         <Star className="h-4 w-4 text-yellow-400 fill-current" />
                         <span className="text-lg font-bold text-gray-900">
-                          {business.rating ? business.rating.toFixed(1) : 'N/A'}
+                          {business.rating ? business.rating.toFixed(1) : "N/A"}
                         </span>
                       </div>
                       <p className="text-xs text-gray-600">Rating</p>
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="flex items-center justify-center space-x-1 mb-1">
                         <BarChart3 className="h-4 w-4 text-gray-400" />
-                        <span className="text-lg font-bold text-gray-900">{business.reviewCount}</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          {business.reviewCount}
+                        </span>
                       </div>
                       <p className="text-xs text-gray-600">Reviews</p>
                     </div>
@@ -157,17 +172,22 @@ export default function MyBusinessesPage() {
                   </div>
                 </div>
 
-                <div className={`px-6 py-3 border-t border-gray-200 ${
-                  business.isActive ? 'bg-green-50' : 'bg-red-50'
-                }`}>
+                <div
+                  className={`px-6 py-3 border-t border-gray-200 ${
+                    business.isActive ? "bg-green-50" : "bg-red-50"
+                  }`}
+                >
                   <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${
-                      business.isActive ? 'text-green-800' : 'text-red-800'
-                    }`}>
-                      {business.isActive ? 'Active' : 'Inactive'}
+                    <span
+                      className={`text-sm font-medium ${
+                        business.isActive ? "text-green-800" : "text-red-800"
+                      }`}
+                    >
+                      {business.isActive ? "Active" : "Inactive"}
                     </span>
                     <span className="text-xs text-gray-500">
-                      Updated {new Date(business.updatedAt).toLocaleDateString()}
+                      Updated{" "}
+                      {new Date(business.updatedAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>

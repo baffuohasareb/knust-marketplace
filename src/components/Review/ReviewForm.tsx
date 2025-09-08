@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Star, Upload, X } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
+import React, { useState } from "react";
+import { Star, Upload, X } from "lucide-react";
+import { useStore } from "../../stores/useStore";
 
 interface ReviewFormProps {
   businessId?: string;
@@ -10,10 +10,18 @@ interface ReviewFormProps {
   onCancel: () => void;
 }
 
-export default function ReviewForm({ businessId, productId, orderId, onSubmit, onCancel }: ReviewFormProps) {
-  const { state, dispatch } = useApp();
+export default function ReviewForm({
+  businessId,
+  productId,
+  orderId,
+  onSubmit,
+  onCancel,
+}: ReviewFormProps) {
+  const user = useStore((state) => state.user);
+  const addReview = useStore((state) => state.addReview);
+  const addNotification = useStore((state) => state.addNotification);
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -36,9 +44,11 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
     setTimeout(() => {
       const review = {
         id: Date.now().toString(),
-        userId: state.user?.id || '1',
-        userName: state.user?.name || 'Anonymous',
-        userAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(state.user?.name || 'Anonymous')}&background=10b981&color=fff`,
+        userId: user?.id || "1",
+        userName: user?.name || "Anonymous",
+        userAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          user?.name || "Anonymous"
+        )}&background=10b981&color=fff`,
         businessId,
         productId,
         orderId,
@@ -47,23 +57,24 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
         createdAt: new Date().toISOString(),
         verified: !!orderId,
         helpful: 0,
-        images: images.map((_, index) => `https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400&t=${Date.now()}-${index}`)
+        images: images.map(
+          (_, index) =>
+            `https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400&t=${Date.now()}-${index}`
+        ),
       };
 
-      dispatch({ type: 'ADD_REVIEW', payload: review });
-      
+      addReview(review);
+
       // Add notification for successful review
-      dispatch({
-        type: 'ADD_NOTIFICATION',
-        payload: {
-          id: Date.now().toString(),
-          userId: state.user?.id || '1',
-          type: 'review',
-          title: 'Review Submitted',
-          message: 'Thank you for your review! It helps other students make better decisions.',
-          read: false,
-          createdAt: new Date().toISOString()
-        }
+      addNotification({
+        id: Date.now().toString(),
+        userId: user?.id || "1",
+        type: "review",
+        title: "Review Submitted",
+        message:
+          "Thank you for your review! It helps other students make better decisions.",
+        read: false,
+        createdAt: new Date().toISOString(),
       });
 
       setLoading(false);
@@ -74,7 +85,7 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6">
       <h3 className="text-xl font-bold text-gray-900 mb-6">Write a Review</h3>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Rating */}
         <div>
@@ -88,19 +99,23 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
                 type="button"
                 onClick={() => setRating(star)}
                 className={`p-1 transition-colors ${
-                  star <= rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
+                  star <= rating
+                    ? "text-yellow-400"
+                    : "text-gray-300 hover:text-yellow-300"
                 }`}
+                title={`Rate ${star} star${star !== 1 ? "s" : ""}`}
+                aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
               >
                 <Star className="h-8 w-8 fill-current" />
               </button>
             ))}
             {rating > 0 && (
               <span className="ml-3 text-sm text-gray-600">
-                {rating === 1 && 'Poor'}
-                {rating === 2 && 'Fair'}
-                {rating === 3 && 'Good'}
-                {rating === 4 && 'Very Good'}
-                {rating === 5 && 'Excellent'}
+                {rating === 1 && "Poor"}
+                {rating === 2 && "Fair"}
+                {rating === 3 && "Good"}
+                {rating === 4 && "Very Good"}
+                {rating === 5 && "Excellent"}
               </span>
             )}
           </div>
@@ -108,7 +123,10 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
 
         {/* Comment */}
         <div>
-          <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="comment"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Your Review *
           </label>
           <textarea
@@ -121,7 +139,8 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            Be honest and helpful. Your review will help other students make informed decisions.
+            Be honest and helpful. Your review will help other students make
+            informed decisions.
           </p>
         </div>
 
@@ -149,9 +168,7 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
             >
               Choose Photos
             </label>
-            <p className="text-xs text-gray-500 mt-1">
-              Max 3 photos, 5MB each
-            </p>
+            <p className="text-xs text-gray-500 mt-1">Max 3 photos, 5MB each</p>
           </div>
 
           {images.length > 0 && (
@@ -167,6 +184,8 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
                     type="button"
                     onClick={() => removeImage(index)}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                    title="Remove image"
+                    aria-label="Remove image"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -201,11 +220,11 @@ export default function ReviewForm({ businessId, productId, orderId, onSubmit, o
             disabled={loading || rating === 0 || !comment.trim()}
             className={`flex-1 px-6 py-3 rounded-lg font-medium transition-colors ${
               loading || rating === 0 || !comment.trim()
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-green-600 text-white hover:bg-green-700'
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-green-600 text-white hover:bg-green-700"
             }`}
           >
-            {loading ? 'Submitting Review...' : 'Submit Review'}
+            {loading ? "Submitting Review..." : "Submit Review"}
           </button>
         </div>
       </form>

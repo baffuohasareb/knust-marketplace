@@ -1,23 +1,41 @@
-import React, { useState } from 'react';
-import { Search, Filter, MapPin, TrendingUp, Percent, Clock } from 'lucide-react';
-import BusinessCard from '../../components/Business/BusinessCard';
-import EmptyState from '../../components/Common/EmptyState';
-import ErrorState from '../../components/Common/ErrorState';
-import { mockBusinesses } from '../../data/mockData';
+import React, { useState } from "react";
+import {
+  Search,
+  Filter,
+  MapPin,
+  TrendingUp,
+  Percent,
+  Clock,
+} from "lucide-react";
+import BusinessCard from "../../components/Business/BusinessCard";
+import EmptyState from "../../components/Common/EmptyState";
+import ErrorState from "../../components/Common/ErrorState";
+import { useStore } from "../../stores/useStore";
 
 export default function BuyerHomePage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const businesses = useStore((state) => state.businesses);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const categories = ['all', 'Electronics', 'Food', 'Stationery', 'Books', 'Beverages', 'Accessories'];
+  const categories = [
+    "all",
+    "Electronics",
+    "Food",
+    "Stationery",
+    "Books",
+    "Beverages",
+    "Accessories",
+  ];
 
-  const filteredBusinesses = mockBusinesses.filter(business => {
-    const matchesSearch = business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         business.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || 
-                           business.categories.some(cat => cat === selectedCategory);
+  const filteredBusinesses = businesses.filter((business) => {
+    const matchesSearch =
+      business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      business.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" ||
+      business.categories.some((cat) => cat === selectedCategory);
     return matchesSearch && matchesCategory;
   });
 
@@ -47,7 +65,7 @@ export default function BuyerHomePage() {
               className="w-full pl-12 pr-4 py-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
             />
           </div>
-          
+
           {/* Category Filters */}
           <div className="flex flex-wrap gap-2 mt-4 justify-center">
             {categories.map((category) => (
@@ -56,11 +74,11 @@ export default function BuyerHomePage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-green-50 hover:text-green-700'
+                    ? "bg-green-600 text-white"
+                    : "bg-white text-gray-600 hover:bg-green-50 hover:text-green-700"
                 }`}
               >
-                {category === 'all' ? 'All Categories' : category}
+                {category === "all" ? "All Categories" : category}
               </button>
             ))}
           </div>
@@ -72,17 +90,23 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <TrendingUp className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Most Viewed Businesses</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Most Viewed Businesses
+              </h2>
             </div>
             {filteredBusinesses.length === 0 ? (
               <EmptyState
                 icon={TrendingUp}
                 title="No businesses found"
-                description={searchQuery ? `No businesses match "${searchQuery}"` : "No businesses available in this category"}
+                description={
+                  searchQuery
+                    ? `No businesses match "${searchQuery}"`
+                    : "No businesses available in this category"
+                }
                 actionText="Clear Search"
                 onAction={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('all');
+                  setSearchQuery("");
+                  setSelectedCategory("all");
                 }}
               />
             ) : (
@@ -98,7 +122,9 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <Percent className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Special Offers & Discounts</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Special Offers & Discounts
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBusinesses.map((business) => (
@@ -111,7 +137,9 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <MapPin className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Closest to You</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Closest to You
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBusinesses.slice(0, 2).map((business) => (
@@ -124,7 +152,9 @@ export default function BuyerHomePage() {
           <section>
             <div className="flex items-center mb-6">
               <Clock className="h-6 w-6 text-green-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">Recently Active</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Recently Active
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBusinesses.map((business) => (

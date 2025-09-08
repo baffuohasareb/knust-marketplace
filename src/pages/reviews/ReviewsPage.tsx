@@ -1,38 +1,45 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Filter, Star, Plus } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
-import { mockReviews } from '../../data/mockData';
-import ReviewCard from '../../components/Review/ReviewCard';
-import ReviewSummary from '../../components/Review/ReviewSummary';
-import EmptyState from '../../components/Common/EmptyState';
-import ErrorState from '../../components/Common/ErrorState';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Filter, Star, Plus } from "lucide-react";
+import { useStore } from "../../stores/useStore";
+import ReviewCard from "../../components/Review/ReviewCard";
+import ReviewSummary from "../../components/Review/ReviewSummary";
+import EmptyState from "../../components/Common/EmptyState";
+import ErrorState from "../../components/Common/ErrorState";
 
 export default function ReviewsPage() {
-  const { state } = useApp();
+  const reviews = useStore((state) => state.reviews);
   const [filterRating, setFilterRating] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "highest" | "lowest"
+  >("newest");
   const [error, setError] = useState<string | null>(null);
 
-  // Combine mock reviews with user reviews
-  const allReviews = [...mockReviews, ...state.reviews];
-  
+  // Use reviews from store
+  const allReviews = reviews;
+
   // Filter and sort reviews
   let filteredReviews = allReviews;
-  
+
   if (filterRating) {
-    filteredReviews = filteredReviews.filter(review => review.rating === filterRating);
+    filteredReviews = filteredReviews.filter(
+      (review) => review.rating === filterRating
+    );
   }
 
   filteredReviews.sort((a, b) => {
     switch (sortBy) {
-      case 'newest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'oldest':
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case 'highest':
+      case "newest":
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      case "oldest":
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      case "highest":
         return b.rating - a.rating;
-      case 'lowest':
+      case "lowest":
         return a.rating - b.rating;
       default:
         return 0;
@@ -40,9 +47,11 @@ export default function ReviewsPage() {
   });
 
   // Calculate review statistics
-  const averageRating = allReviews.length > 0 
-    ? allReviews.reduce((sum, review) => sum + review.rating, 0) / allReviews.length 
-    : 0;
+  const averageRating =
+    allReviews.length > 0
+      ? allReviews.reduce((sum, review) => sum + review.rating, 0) /
+        allReviews.length
+      : 0;
 
   const ratingDistribution = allReviews.reduce((acc, review) => {
     acc[review.rating] = (acc[review.rating] || 0) + 1;
@@ -97,7 +106,9 @@ export default function ReviewsPage() {
                     <button
                       onClick={() => setFilterRating(null)}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                        filterRating === null ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'
+                        filterRating === null
+                          ? "bg-green-100 text-green-700"
+                          : "hover:bg-gray-100"
                       }`}
                     >
                       All Ratings
@@ -107,7 +118,9 @@ export default function ReviewsPage() {
                         key={rating}
                         onClick={() => setFilterRating(rating)}
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center space-x-2 ${
-                          filterRating === rating ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'
+                          filterRating === rating
+                            ? "bg-green-100 text-green-700"
+                            : "hover:bg-gray-100"
                         }`}
                       >
                         <div className="flex items-center space-x-1">
@@ -115,7 +128,9 @@ export default function ReviewsPage() {
                             <Star
                               key={star}
                               className={`h-3 w-3 ${
-                                star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                star <= rating
+                                  ? "text-yellow-400 fill-current"
+                                  : "text-gray-300"
                               }`}
                             />
                           ))}
@@ -134,6 +149,8 @@ export default function ReviewsPage() {
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                    title="Sort reviews by"
+                    aria-label="Sort reviews by"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -152,19 +169,26 @@ export default function ReviewsPage() {
                 icon={Star}
                 title="No reviews found"
                 description={
-                  filterRating 
-                    ? `No reviews with ${filterRating} star${filterRating !== 1 ? 's' : ''} found.`
-                    : 'No reviews available yet.'
+                  filterRating
+                    ? `No reviews with ${filterRating} star${
+                        filterRating !== 1 ? "s" : ""
+                      } found.`
+                    : "No reviews available yet."
                 }
-                actionText={!filterRating ? "Write the first review" : "Clear filter"}
+                actionText={
+                  !filterRating ? "Write the first review" : "Clear filter"
+                }
                 actionLink={!filterRating ? "/reviews/write" : undefined}
-                onAction={filterRating ? () => setFilterRating(null) : undefined}
+                onAction={
+                  filterRating ? () => setFilterRating(null) : undefined
+                }
               />
             ) : (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">
-                    Showing {filteredReviews.length} of {allReviews.length} review{allReviews.length !== 1 ? 's' : ''}
+                    Showing {filteredReviews.length} of {allReviews.length}{" "}
+                    review{allReviews.length !== 1 ? "s" : ""}
                   </p>
                   {filterRating && (
                     <button

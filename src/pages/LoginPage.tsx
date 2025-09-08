@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Mail, Lock, ArrowLeft } from 'lucide-react';
-import { useApp } from '../contexts/AppContext';
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Mail, Lock, ArrowLeft } from "lucide-react";
+import { useStore } from "../stores/useStore";
 
 export default function LoginPage() {
   const { userType } = useParams<{ userType: string }>();
   const navigate = useNavigate();
-  const { dispatch } = useApp();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const login = useStore((state) => state.login);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -17,25 +17,25 @@ export default function LoginPage() {
 
     // Simulate UITS authentication
     setTimeout(() => {
-      if (email.endsWith('@knust.edu.gh') && password.length > 0) {
+      if (email.endsWith("@knust.edu.gh") && password.length > 0) {
         // Mock student data
         const mockUser = {
-          id: '1',
-          name: 'John Doe',
+          id: "1",
+          name: "John Doe",
           email: email,
-          indexNumber: '20123456',
-          programme: 'Computer Engineering',
+          indexNumber: "20123456",
+          programme: "Computer Engineering",
           year: 3,
-          hall: 'Unity Hall'
+          hall: "Unity Hall",
         };
 
-        dispatch({ type: 'LOGIN', payload: mockUser });
-        
-        if (userType === 'buyer') {
-          navigate('/buyer/home');
+        login(mockUser);
+
+        if (userType === "buyer") {
+          navigate("/buyer/home");
         }
       } else {
-        alert('Please use a valid KNUST email address');
+        alert("Please use a valid KNUST email address");
       }
       setLoading(false);
     }, 1500);
@@ -47,7 +47,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           <div className="p-8">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -59,7 +59,7 @@ export default function LoginPage() {
                 <span className="text-white font-bold text-xl">KM</span>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                Sign in as {userType === 'buyer' ? 'Buyer' : 'Seller'}
+                Sign in as {userType === "buyer" ? "Buyer" : "Seller"}
               </h1>
               <p className="text-gray-600">
                 Use your KNUST credentials to continue
@@ -68,7 +68,10 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   KNUST Email
                 </label>
                 <div className="relative">
@@ -86,7 +89,10 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -108,11 +114,11 @@ export default function LoginPage() {
                 disabled={loading}
                 className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all ${
                   loading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700 active:transform active:scale-95'
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 active:transform active:scale-95"
                 }`}
               >
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? "Signing in..." : "Sign In"}
               </button>
             </form>
 

@@ -1,43 +1,92 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Image, Paperclip, Phone, Video, MoreVertical } from 'lucide-react';
-import { useApp } from '../../contexts/AppContext';
-import { mockConversations, mockMessages, mockBusinesses } from '../../data/mockData';
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Send, Phone, MoreVertical } from "lucide-react";
+import { useStore } from "../../stores/useStore";
+import ConversationList from "../../components/Chat/ConversationList";
+import MessageBubble from "../../components/Chat/MessageBubble";
+import MessageInput from "../../components/Chat/MessageInput";
 
 export default function ChatPage() {
   const { vendorId } = useParams<{ vendorId?: string }>();
-  const { state } = useApp();
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(vendorId || null);
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState(mockMessages);
+  const conversations = useStore((state) => state.conversations);
+  const businesses = useStore((state) => state.businesses);
+  const user = useStore((state) => state.user);
+  const updateConversation = useStore((state) => state.updateConversation);
+  const addNotification = useStore((state) => state.addNotification);
+
+  const [selectedConversation, setSelectedConversation] = useState<
+    string | null
+  >(vendorId || null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const conversations = mockConversations;
-  const currentConversation = conversations.find(c => c.id === selectedConversation);
-  const currentBusiness = currentConversation ? mockBusinesses.find(b => b.id === currentConversation.businessId) : null;
+  // Get current conversation and business
+  const currentConversation = conversations.find(
+    (c) => c.id === selectedConversation
+  );
+  const currentBusiness = currentConversation
+    ? businesses.find((b) => b.id === currentConversation.businessId)
+    : null;
+
+  // Get messages for current conversation (in a real app, this would be fetched from API)
+  const [messages, setMessages] = useState(
+    currentConversation?.lastMessage ? [currentConversation.lastMessage] : []
+  );
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || !selectedConversation) return;
+  const handleSendMessage = (messageText: string) => {
+    if (!selectedConversation || !currentConversation) return;
 
     const newMessage = {
       id: Date.now().toString(),
-      senderId: state.user?.id || '1',
-      senderName: state.user?.name || 'You',
-      senderType: 'buyer' as const,
-      receiverId: currentConversation?.sellerId || '1',
-      message: message.trim(),
+      senderId: user?.id || "1",
+      senderName: user?.name || "You",
+      senderType: "buyer" as const,
+      receiverId: currentConversation.sellerId || "1",
+      message: messageText,
       timestamp: new Date().toISOString(),
       read: false,
-      type: 'text' as const
+      type: "text" as const,
     };
 
+    // Update local messages
     setMessages([...messages, newMessage]);
-    setMessage('');
+
+    // Update conversation in store
+    const updatedConversation = {
+      ...currentConversation,
+      lastMessage: newMessage,
+      updatedAt: new Date().toISOString(),
+      unreadCount: 0, // Reset unread count when user sends a message
+    };
+
+    updateConversation(updatedConversation);
+
+    // Add notification for the receiver (in a real app, this would be sent via WebSocket)
+    addNotification({
+      id: Date.now().toString(),
+      userId: currentConversation.sellerId || "1",
+      type: "message",
+      title: "New Message",
+      message: `${user?.name || "Someone"} sent you a message`,
+      read: false,
+      createdAt: new Date().toISOString(),
+      actionUrl: `/chat/${currentConversation.id}`,
+    });
+  };
+
+  const handleConversationSelect = (conversationId: string) => {
+    setSelectedConversation(conversationId);
+    const conversation = conversations.find((c) => c.id === conversationId);
+    if (conversation?.lastMessage) {
+      setMessages([conversation.lastMessage]);
+    } else {
+      setMessages([]);
+    }
   };
 
   if (!vendorId && conversations.length === 0) {
@@ -56,8 +105,12 @@ export default function ChatPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Send className="h-8 w-8 text-gray-400" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No conversations yet</h2>
-            <p className="text-gray-600 mb-6">Start chatting with sellers to see your conversations here</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              No conversations yet
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Start chatting with sellers to see your conversations here
+            </p>
             <Link
               to="/buyer/home"
               className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -84,45 +137,19 @@ export default function ChatPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden h-[600px] flex">
           {/* Conversations List */}
           {!vendorId && (
-            <div className="w-1/3 border-r border-gray-200 flex flex-col">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                {conversations.map((conversation) => (
-                  <button
-                    key={conversation.id}
-                    onClick={() => setSelectedConversation(conversation.id)}
-                    className={`w-full p-4 text-left hover:bg-gray-50 border-b border-gray-100 transition-colors ${
-                      selectedConversation === conversation.id ? 'bg-green-50 border-green-200' : ''
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={conversation.businessLogo}
-                        alt={conversation.businessName}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{conversation.businessName}</p>
-                        <p className="text-sm text-gray-600 truncate">
-                          {conversation.lastMessage?.message || 'No messages yet'}
-                        </p>
-                      </div>
-                      {conversation.unreadCount > 0 && (
-                        <span className="bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                          {conversation.unreadCount}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <ConversationList
+              conversations={conversations}
+              selectedConversation={selectedConversation}
+              onConversationSelect={handleConversationSelect}
+              searchQuery={searchQuery}
+              showSearch={showSearch}
+              onSearchToggle={() => setShowSearch(!showSearch)}
+              onSearchChange={setSearchQuery}
+            />
           )}
 
           {/* Chat Area */}
-          <div className={`${vendorId ? 'w-full' : 'flex-1'} flex flex-col`}>
+          <div className={`${vendorId ? "w-full" : "flex-1"} flex flex-col`}>
             {currentConversation && currentBusiness ? (
               <>
                 {/* Chat Header */}
@@ -134,9 +161,13 @@ export default function ChatPage() {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <h3 className="font-semibold text-gray-900">{currentBusiness.name}</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        {currentBusiness.name}
+                      </h3>
                       <p className="text-sm text-gray-600">
-                        {currentBusiness.responseTime ? `Usually responds in ${currentBusiness.responseTime}` : 'Online'}
+                        {currentBusiness.responseTime
+                          ? `Usually responds in ${currentBusiness.responseTime}`
+                          : "Online"}
                       </p>
                     </div>
                   </div>
@@ -145,11 +176,17 @@ export default function ChatPage() {
                       <a
                         href={`tel:${currentBusiness.phone}`}
                         className="p-2 text-gray-600 hover:text-green-600 transition-colors"
+                        title="Call business"
+                        aria-label="Call business"
                       >
                         <Phone className="h-5 w-5" />
                       </a>
                     )}
-                    <button className="p-2 text-gray-600 hover:text-green-600 transition-colors">
+                    <button
+                      className="p-2 text-gray-600 hover:text-green-600 transition-colors"
+                      title="More options"
+                      aria-label="More options"
+                    >
                       <MoreVertical className="h-5 w-5" />
                     </button>
                   </div>
@@ -157,65 +194,43 @@ export default function ChatPage() {
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.senderType === 'buyer' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          msg.senderType === 'buyer'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 text-gray-900'
-                        }`}
-                      >
-                        <p className="text-sm">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${
-                          msg.senderType === 'buyer' ? 'text-green-100' : 'text-gray-500'
-                        }`}>
-                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center text-gray-500">
+                        <Send className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium">No messages yet</p>
+                        <p className="text-sm">
+                          Start a conversation with {currentBusiness?.name}
                         </p>
                       </div>
                     </div>
-                  ))}
+                  ) : (
+                    messages.map((msg, index) => {
+                      const isConsecutive =
+                        index > 0 &&
+                        messages[index - 1].senderType === msg.senderType &&
+                        new Date(msg.timestamp).getTime() -
+                          new Date(messages[index - 1].timestamp).getTime() <
+                          5 * 60 * 1000; // 5 minutes
+
+                      return (
+                        <MessageBubble
+                          key={msg.id}
+                          message={msg}
+                          isConsecutive={isConsecutive}
+                          businessLogo={currentBusiness?.logo}
+                        />
+                      );
+                    })
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Message Input */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      type="button"
-                      className="p-2 text-gray-600 hover:text-green-600 transition-colors"
-                    >
-                      <Paperclip className="h-5 w-5" />
-                    </button>
-                    <button
-                      type="button"
-                      className="p-2 text-gray-600 hover:text-green-600 transition-colors"
-                    >
-                      <Image className="h-5 w-5" />
-                    </button>
-                    <input
-                      type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Type a message..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                    <button
-                      type="submit"
-                      disabled={!message.trim()}
-                      className={`p-2 rounded-lg transition-colors ${
-                        message.trim()
-                          ? 'bg-green-600 text-white hover:bg-green-700'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      <Send className="h-5 w-5" />
-                    </button>
-                  </div>
-                </form>
+                <MessageInput
+                  onSendMessage={handleSendMessage}
+                  disabled={!currentConversation}
+                />
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center">
@@ -223,8 +238,12 @@ export default function ChatPage() {
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Send className="h-8 w-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Select a conversation</h3>
-                  <p className="text-gray-600">Choose a conversation to start messaging</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Select a conversation
+                  </h3>
+                  <p className="text-gray-600">
+                    Choose a conversation to start messaging
+                  </p>
                 </div>
               </div>
             )}
