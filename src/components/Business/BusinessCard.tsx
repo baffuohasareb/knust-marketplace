@@ -6,9 +6,10 @@ import { useApp } from '../../contexts/AppContext';
 
 interface BusinessCardProps {
   business: Business;
+  className?: string;
 }
 
-export default function BusinessCard({ business }: BusinessCardProps) {
+export default function BusinessCard({ business, className = '' }: BusinessCardProps) {
   const { state, dispatch } = useApp();
   
   const isFavorite = state.favorites.some(fav => fav.id === business.id);
@@ -19,9 +20,17 @@ export default function BusinessCard({ business }: BusinessCardProps) {
     dispatch({ type: 'TOGGLE_FAVORITE', payload: business });
   };
 
+  const truncateWords = (text: string, maxWords: number) => {
+    const words = text?.toString().trim().split(/\s+/) || [];
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(' ') + '...';
+  };
+
+  const shortDesc = truncateWords(business.description, 4);
+
   return (
     <Link to={`/business/${business.id}`}>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
+      <div className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1 group h-full flex flex-col ${className}`}>
         <div className="relative">
           <img
             src={business.logo}
@@ -47,9 +56,9 @@ export default function BusinessCard({ business }: BusinessCardProps) {
           )}
         </div>
 
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-1">
           <h3 className="font-semibold text-gray-900 mb-1 truncate">{business.name}</h3>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{business.description}</p>
+          <p className="text-sm text-gray-600 mb-2" title={business.description}>{shortDesc}</p>
           
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-1">
@@ -80,7 +89,7 @@ export default function BusinessCard({ business }: BusinessCardProps) {
             )}
           </div>
 
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 mt-auto">
             {business.categories.slice(0, 2).map((category) => (
               <span
                 key={category}
