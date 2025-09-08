@@ -1,8 +1,8 @@
-import { Business, Product, Order, Review, ChatConversation, ChatMessage, Notification, OrderUpdate } from '../types';
+import { Business, Product, Order, Review, ChatConversation, ChatMessage, Notification } from '../types';
 import type { VendorBusiness, VendorProduct, VendorOrder, BusinessAnalytics } from '../types';
 
 export const mockBusinesses: Business[] = [
-  {
+  { 
     id: '1',
     name: 'TechHub Electronics',
     logo: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=200',

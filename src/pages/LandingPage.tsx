@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Store } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 
 export default function LandingPage() {
   return (
