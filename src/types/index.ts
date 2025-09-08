@@ -55,6 +55,7 @@ export interface CartItem {
   name: string;
   image: string;
   businessName: string;
+  businessId?: string; // optional: helps map buyer items to vendor orders
 }
 
 export interface Order {
@@ -211,6 +212,7 @@ export interface VendorOrder {
   status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'out-for-delivery' | 'delivered' | 'cancelled';
   createdAt: string;
   updatedAt?: string;
+  buyerOrderId?: string;
   deliveryInfo: {
     hall: string;
     room: string;

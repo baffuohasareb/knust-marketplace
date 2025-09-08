@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { User, CartItem, Order, Business, Review, ChatConversation, Notification } from '../types';
+import React, { createContext, useContext, useEffect, useReducer, ReactNode } from 'react';
+import { User, CartItem, Order, Business, Review, ChatConversation, Notification, VendorBusiness, OnboardingData, VendorOrder } from '../types';
+import { mockUserBusinesses } from '../data/mockData';
 
 interface AppState {
   user: User | null;
   cart: CartItem[];
   orders: Order[];
+  vendorOrders: VendorOrder[];
   favorites: Business[];
   reviews: Review[];
   conversations: ChatConversation[];
@@ -22,7 +24,10 @@ type AppAction =
   | { type: 'REMOVE_FROM_CART'; payload: string }
   | { type: 'CLEAR_CART' }
   | { type: 'ADD_ORDER'; payload: Order }
+  | { type: 'ADD_VENDOR_ORDERS'; payload: VendorOrder[] }
+  | { type: 'UPDATE_VENDOR_ORDER_STATUS'; payload: { orderId: string; status: VendorOrder['status'] } }
   | { type: 'UPDATE_ORDER_STATUS'; payload: { orderId: string; status: Order['status']; update?: any } }
+  | { type: 'CLEAR_ALL_ORDERS' }
   | { type: 'TOGGLE_FAVORITE'; payload: Business }
   | { type: 'ADD_REVIEW'; payload: Review }
   | { type: 'UPDATE_CONVERSATION'; payload: ChatConversation }
@@ -37,12 +42,14 @@ const initialState: AppState = {
   user: null,
   cart: [],
   orders: [],
+  vendorOrders: [],
   favorites: [],
   reviews: [],
   conversations: [],
   notifications: [],
   isAuthenticated: false,
-  userBusinesses: [],
+  // Seed demo vendor businesses so every logged-in account sees labeled businesses
+  userBusinesses: mockUserBusinesses,
   onboardingData: {
     businessType: '',
     businessInfo: {
@@ -84,13 +91,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...initialState,
       };
+
     case 'ADD_TO_CART':
-      const existingItem = state.cart.find(item => 
+      const existingItem = state.cart.find(item =>
         item.productId === action.payload.productId &&
         item.selectedSize === action.payload.selectedSize &&
         item.selectedColor === action.payload.selectedColor
       );
-      
+
       if (existingItem) {
         return {
           ...state,
@@ -103,24 +111,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
           ),
         };
       }
-      
+
       return {
         ...state,
         cart: [...state.cart, action.payload],
-      };
-    case 'UPDATE_CART_ITEM':
-      return {
-        ...state,
-        cart: state.cart.map(item =>
-          item.productId === action.payload.productId
-            ? { ...item, quantity: action.payload.quantity }
-            : item
-        ),
-      };
-    case 'REMOVE_FROM_CART':
-      return {
-        ...state,
-        cart: state.cart.filter(item => item.productId !== action.payload),
       };
     case 'CLEAR_CART':
       return {
@@ -132,78 +126,42 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         orders: [action.payload, ...state.orders],
       };
+    case 'ADD_VENDOR_ORDERS':
+      return {
+        ...state,
+        vendorOrders: [...action.payload, ...state.vendorOrders],
+      };
+    case 'UPDATE_VENDOR_ORDER_STATUS':
+      return {
+        ...state,
+        vendorOrders: state.vendorOrders.map(order =>
+          order.id === action.payload.orderId
+            ? { ...order, status: action.payload.status, updatedAt: new Date().toISOString() }
+            : order
+        ),
+      };
+
     case 'UPDATE_ORDER_STATUS':
       return {
         ...state,
         orders: state.orders.map(order =>
           order.id === action.payload.orderId
-            ? { 
-                ...order, 
+            ? {
+                ...order,
                 status: action.payload.status,
                 updatedAt: new Date().toISOString(),
-                trackingUpdates: action.payload.update 
+                trackingUpdates: action.payload.update
                   ? [...(order.trackingUpdates || []), action.payload.update]
-                  : order.trackingUpdates
+                  : order.trackingUpdates,
               }
             : order
         ),
       };
-    case 'TOGGLE_FAVORITE':
-      const isFavorite = state.favorites.some(fav => fav.id === action.payload.id);
+    case 'CLEAR_ALL_ORDERS':
       return {
         ...state,
-        favorites: isFavorite
-          ? state.favorites.filter(fav => fav.id !== action.payload.id)
-          : [...state.favorites, action.payload],
-      };
-    case 'ADD_REVIEW':
-      return {
-        ...state,
-        reviews: [action.payload, ...state.reviews],
-      };
-    case 'UPDATE_CONVERSATION':
-      const existingConversation = state.conversations.find(conv => conv.id === action.payload.id);
-      if (existingConversation) {
-        return {
-          ...state,
-          conversations: state.conversations.map(conv =>
-            conv.id === action.payload.id ? action.payload : conv
-          ),
-        };
-      }
-      return {
-        ...state,
-        conversations: [action.payload, ...state.conversations],
-      };
-    case 'ADD_NOTIFICATION':
-      return {
-        ...state,
-        notifications: [action.payload, ...state.notifications],
-      };
-    case 'MARK_NOTIFICATION_READ':
-      return {
-        ...state,
-        notifications: state.notifications.map(notif =>
-          notif.id === action.payload ? { ...notif, read: true } : notif
-        ),
-      };
-    case 'MARK_ALL_NOTIFICATIONS_READ':
-      return {
-        ...state,
-        notifications: state.notifications.map(notif => ({ ...notif, read: true })),
-      };
-    case 'ADD_USER_BUSINESS':
-      return {
-        ...state,
-        userBusinesses: [...state.userBusinesses, action.payload],
-      };
-    case 'UPDATE_ONBOARDING_DATA':
-      return {
-        ...state,
-        onboardingData: {
-          ...state.onboardingData,
-          ...action.payload,
-        },
+        orders: [],
+        vendorOrders: [],
       };
     case 'CLEAR_ONBOARDING_DATA':
       return {
@@ -216,7 +174,33 @@ function appReducer(state: AppState, action: AppAction): AppState {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(appReducer, initialState);
+  // Initialize state from localStorage if available
+  const [state, dispatch] = useReducer(appReducer, undefined as any, () => {
+    try {
+      const raw = localStorage.getItem('knust_marketplace_app_state');
+      if (raw) {
+        const parsed = JSON.parse(raw) as AppState;
+        return {
+          ...initialState,
+          ...parsed,
+          // Ensure required demo businesses are present for showcasing
+          userBusinesses: parsed.userBusinesses && parsed.userBusinesses.length > 0 ? parsed.userBusinesses : initialState.userBusinesses,
+        } as AppState;
+      }
+    } catch (e) {
+      console.warn('Failed to parse saved state. Using defaults.', e);
+    }
+    return initialState;
+  });
+
+  // Persist state to localStorage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('knust_marketplace_app_state', JSON.stringify(state));
+    } catch (e) {
+      console.warn('Failed to persist state', e);
+    }
+  }, [state]);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>

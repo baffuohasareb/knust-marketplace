@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, X, Plus, Minus, Package, Wrench, Tag, DollarSign, Hash } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { businessCategories } from '../../data/mockData';
+import { businessCategories, mockBusinesses } from '../../data/mockData';
+import { useProductsStore } from '../../store/productsStore';
+import type { Product } from '../../types';
 
 interface ProductVariation {
   id: string;
@@ -12,7 +14,8 @@ interface ProductVariation {
 
 interface ProductImage {
   file: File;
-  preview: string;
+  preview: string; // object URL for immediate preview
+  dataUrl?: string; // persisted base64 data URL for storage
   id: string;
 }
 
@@ -20,11 +23,14 @@ export default function AddProductPage() {
   const { vendorId } = useParams<{ vendorId: string }>();
   const navigate = useNavigate();
   const { state } = useApp();
-  
+  const productsStore = useProductsStore();
+
   const [formData, setFormData] = useState({
     name: '',
+    brand: '',
     description: '',
     price: '',
+    compareAtPrice: '',
     category: '',
     stock: '',
     sku: '',
@@ -35,23 +41,48 @@ export default function AddProductPage() {
       height: ''
     },
     tags: '',
+    highlights: '',
     isActive: true,
     allowBackorders: false,
     trackQuantity: true,
     isDigital: false,
     requiresShipping: true
   });
-  
+
   const [images, setImages] = useState<ProductImage[]>([]);
   const [variations, setVariations] = useState<ProductVariation[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'variations' | 'inventory' | 'shipping'>('basic');
 
-  const business = state.userBusinesses.find(b => b.id === vendorId);
+  // Resolve business: prefer owned vendor, fallback to marketplace mapping by id
+  let business = state.userBusinesses.find(b => b.id === vendorId) as any;
+  if (!business) {
+    const m = mockBusinesses.find(b => b.id === vendorId);
+    if (m) {
+      business = {
+        id: m.id,
+        ownerId: 'marketplace',
+        name: m.name,
+        description: m.description,
+        logo: m.logo,
+        businessType: 'both' as const,
+        category: m.categories?.[0] || m.location || 'General',
+        tags: m.categories || [],
+        contactInfo: { hall: m.location || '', room: '', landmark: '', phone: m.phone || '', whatsapp: m.whatsapp || '' },
+        delivery: { available: !!m.deliveryAvailable, fee: 0, coverage: '' },
+        productCount: m.totalSales || 0,
+        rating: m.rating,
+        reviewCount: m.reviewCount || 0,
+        isActive: true,
+        createdAt: m.joinedDate || new Date().toISOString(),
+        updatedAt: m.joinedDate || new Date().toISOString(),
+      };
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
@@ -69,14 +100,27 @@ export default function AddProductPage() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newImages: ProductImage[] = files.map(file => ({
-      file,
-      preview: URL.createObjectURL(file),
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
-    }));
-    
+    const newImages: ProductImage[] = [];
+    for (const file of files) {
+      const preview = URL.createObjectURL(file);
+      const dataUrl = await fileToDataUrl(file);
+      newImages.push({
+        file,
+        preview,
+        dataUrl,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      });
+    }
     setImages(prev => [...prev, ...newImages].slice(0, 10)); // Max 10 images
   };
 
@@ -137,14 +181,36 @@ export default function AddProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.description || !formData.price || !formData.category) return;
-    
+
     setLoading(true);
 
-    // Simulate API call
+    // Simulate API call and persist product to store
     setTimeout(() => {
-      alert('Product added successfully!');
+      const bizId = vendorId as string; // vendorId may be owned or marketplace id; both are handled in listings
+      const newProduct: Product = {
+        id: `P${Date.now()}`,
+        businessId: bizId,
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        price: parseFloat(formData.price || '0') || 0,
+        // Persist base64 dataUrls so they survive reloads
+        images: images.length > 0
+          ? images.map(i => i.dataUrl || i.preview)
+          : [business.logo],
+        category: formData.category,
+        stock: parseInt(formData.stock || '0') || 0,
+        rating: 0,
+        reviewCount: 0,
+        options: variations.length > 0 ? {
+          sizes: variations.find(v => v.name.toLowerCase().includes('size'))?.values.filter(Boolean),
+          colors: variations.find(v => v.name.toLowerCase().includes('color'))?.values.filter(Boolean),
+        } : undefined,
+      };
+
+      productsStore.addProduct(newProduct);
+      setLoading(false);
       navigate(`/vendor/${vendorId}/dashboard`);
-    }, 2000);
+    }, 800);
   };
 
   const isFormValid = formData.name && formData.description && formData.price && formData.category;
@@ -241,6 +307,21 @@ export default function AddProductPage() {
                     </div>
 
                     <div>
+                      <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-2">
+                        Brand (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        id="brand"
+                        name="brand"
+                        value={formData.brand}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Apple, Samsung, Nike"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div>
                       <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                         Category *
                       </label>
@@ -283,6 +364,27 @@ export default function AddProductPage() {
                     </div>
 
                     <div>
+                      <label htmlFor="compareAtPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                        Compare-at Price (Optional)
+                      </label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <input
+                          type="number"
+                          id="compareAtPrice"
+                          name="compareAtPrice"
+                          value={formData.compareAtPrice}
+                          onChange={handleInputChange}
+                          placeholder="30.00"
+                          min="0"
+                          step="0.50"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Used to show discounts and promotions.</p>
+                    </div>
+
+                    <div>
                       <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-2">
                         SKU (Optional)
                       </label>
@@ -313,6 +415,22 @@ export default function AddProductPage() {
                       <p className="text-xs text-gray-500 mt-1">
                         Separate tags with commas to help customers find your {isService ? 'service' : 'product'}
                       </p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="highlights" className="block text-sm font-medium text-gray-700 mb-2">
+                        Key Highlights (Optional)
+                      </label>
+                      <textarea
+                        id="highlights"
+                        name="highlights"
+                        value={formData.highlights}
+                        onChange={handleInputChange}
+                        rows={3}
+                        placeholder="Bullet your top benefits, separated by commas. e.g., 24h battery, Noise-cancelling, Lightweight"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">These appear as selling points on the product page.</p>
                     </div>
                   </div>
 

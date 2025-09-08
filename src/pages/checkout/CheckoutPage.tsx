@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Phone } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
+import { useOrdersStore } from '../../store/ordersStore';
 
 export default function CheckoutPage() {
   const { state, dispatch } = useApp();
+  const ordersStore = useOrdersStore();
   const navigate = useNavigate();
   const [deliveryInfo, setDeliveryInfo] = useState({
     hall: '',
@@ -48,7 +50,65 @@ export default function CheckoutPage() {
         deliveryContact: '+233241234567'
       };
 
+      // Build vendor orders grouped by business
+      const groups = new Map<string, { key: string; businessName: string; items: typeof state.cart }>();
+      for (const item of state.cart) {
+        const key = item.businessId || item.businessName; // prefer explicit businessId if available
+        const existing = groups.get(key);
+        if (existing) {
+          existing.items.push(item);
+        } else {
+          groups.set(key, { key, businessName: item.businessName, items: [item] });
+        }
+      }
+
+      const customerName = state.user?.name || 'Demo Customer';
+      const customerId = state.user?.id || 'demo-user';
+      const customerContact = '+233241234567';
+
+      const vendorOrders = Array.from(groups.values()).map((g, idx) => {
+        const vendorOrderId = `VO${Date.now()}${idx}`;
+        // Try to match a vendor business by name; if none, use the marketplace business id from cart (g.key)
+        const matchedVendor = state.userBusinesses.find(b => b.name === g.businessName);
+        const businessId = matchedVendor ? matchedVendor.id : String(g.key);
+        const totalForGroup = g.items.reduce((sum, it) => sum + it.price * it.quantity, 0);
+        return {
+          id: vendorOrderId,
+          businessId,
+          customerId,
+          customerName,
+          items: g.items,
+          total: totalForGroup,
+          status: 'pending' as const,
+          createdAt: new Date().toISOString(),
+          buyerOrderId: orderId,
+          deliveryInfo,
+          paymentMethod: paymentMethods.find(p => p.id === paymentMethod)?.name || '',
+          customerContact,
+        };
+      });
+
       dispatch({ type: 'ADD_ORDER', payload: order });
+      ordersStore.addOrder(order);
+      // Add a notification for the buyer
+      dispatch({
+        type: 'ADD_NOTIFICATION',
+        payload: {
+          id: `N${Date.now()}`,
+          userId: state.user?.id || 'demo-user',
+          type: 'order_update',
+          title: 'Order Placed',
+          message: `Your order #${orderId} has been placed successfully.`,
+          read: false,
+          createdAt: new Date().toISOString(),
+          actionUrl: `/order/${orderId}`,
+          orderId,
+        },
+      });
+      if (vendorOrders.length > 0) {
+        dispatch({ type: 'ADD_VENDOR_ORDERS', payload: vendorOrders });
+        ordersStore.addVendorOrders(vendorOrders);
+      }
       dispatch({ type: 'CLEAR_CART' });
       navigate(`/order/${orderId}/success`);
     }, 2000);

@@ -1,55 +1,25 @@
-import React from 'react';
+// Notifications are derived from persisted orders in app state
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Bell, Package, MessageCircle, Star, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Bell, Package } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { mockNotifications } from '../../data/mockData';
 
 export default function NotificationsPage() {
-  const { state, dispatch } = useApp();
-  
-  const notifications = [...mockNotifications, ...state.notifications].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const { state } = useApp();
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'order_update':
-        return <Package className="h-5 w-5" />;
-      case 'message':
-        return <MessageCircle className="h-5 w-5" />;
-      case 'review':
-        return <Star className="h-5 w-5" />;
-      case 'system':
-        return <AlertTriangle className="h-5 w-5" />;
-      default:
-        return <Bell className="h-5 w-5" />;
-    }
-  };
+  // Derive alerts directly from persisted orders
+  const notifications = state.orders
+    .map((order) => ({
+      id: order.id,
+      type: 'order_update' as const,
+      title: `Order #${order.id} — ${order.status.replace('-', ' ')}`,
+      message: `Placed on ${new Date(order.createdAt).toLocaleString()} | Items: ${order.items.length} | Total: ₵${order.total.toFixed(2)} | Payment: ${order.paymentMethod}`,
+      createdAt: order.createdAt,
+      actionUrl: `/order/${order.id}`,
+    }))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'order_update':
-        return 'text-blue-600 bg-blue-100';
-      case 'message':
-        return 'text-green-600 bg-green-100';
-      case 'review':
-        return 'text-yellow-600 bg-yellow-100';
-      case 'system':
-        return 'text-red-600 bg-red-100';
-      default:
-        return 'text-gray-600 bg-gray-100';
-    }
-  };
-
-  const handleMarkAsRead = (notificationId: string) => {
-    dispatch({ type: 'MARK_NOTIFICATION_READ', payload: notificationId });
-  };
-
-  const handleMarkAllAsRead = () => {
-    dispatch({ type: 'MARK_ALL_NOTIFICATIONS_READ' });
-  };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const getNotificationIcon = () => <Package className="h-5 w-5" />;
+  const getNotificationColor = () => 'text-blue-600 bg-blue-100';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,21 +33,9 @@ export default function NotificationsPage() {
         </Link>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-              {unreadCount > 0 && (
-                <p className="text-sm text-gray-600">{unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}</p>
-              )}
-            </div>
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllAsRead}
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
-              >
-                Mark all as read
-              </button>
-            )}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">Alerts</h1>
+            <p className="text-sm text-gray-600">Showing {notifications.length} update{notifications.length !== 1 ? 's' : ''} from your orders</p>
           </div>
 
           {notifications.length === 0 ? (
@@ -93,41 +51,25 @@ export default function NotificationsPage() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-6 hover:bg-gray-50 transition-colors ${
-                    !notification.read ? 'bg-blue-50' : ''
-                  }`}
+                  className="p-6 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start space-x-4">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor(notification.type)}`}>
-                      {getNotificationIcon(notification.type)}
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getNotificationColor()}`}>
+                      {getNotificationIcon()}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className={`font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <h3 className="font-medium text-gray-900">
                             {notification.title}
                           </h3>
-                          <p className={`mt-1 text-sm ${!notification.read ? 'text-gray-700' : 'text-gray-600'}`}>
+                          <p className="mt-1 text-sm text-gray-700">
                             {notification.message}
                           </p>
                           <p className="mt-2 text-xs text-gray-500">
                             {new Date(notification.createdAt).toLocaleString()}
                           </p>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 ml-4">
-                          {!notification.read && (
-                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                          )}
-                          {!notification.read && (
-                            <button
-                              onClick={() => handleMarkAsRead(notification.id)}
-                              className="text-xs text-blue-600 hover:text-blue-700"
-                            >
-                              Mark as read
-                            </button>
-                          )}
                         </div>
                       </div>
                       

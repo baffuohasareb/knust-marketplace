@@ -26,6 +26,29 @@ export default function OrderTrackingPage() {
     );
   }
 
+  // Stepper config
+  const steps: { key: typeof order.status; label: string; icon: JSX.Element }[] = [
+    { key: 'pending', label: 'Pending', icon: <Clock className="h-4 w-4" /> },
+    { key: 'confirmed', label: 'Confirmed', icon: <CheckCircle className="h-4 w-4" /> },
+    { key: 'preparing', label: 'Preparing', icon: <Package className="h-4 w-4" /> },
+    { key: 'ready', label: 'Ready', icon: <Package className="h-4 w-4" /> },
+    { key: 'out-for-delivery', label: 'On the way', icon: <Truck className="h-4 w-4" /> },
+    { key: 'delivered', label: 'Delivered', icon: <CheckCircle className="h-4 w-4" /> },
+  ];
+
+  const currentStepIndex = steps.findIndex(s => s.key === order.status);
+  const progressPercent = Math.max(0, currentStepIndex) / Math.max(1, steps.length - 1) * 100;
+
+  // Synthesize minimal tracking updates if none exist, so the timeline is always informative
+  const synthesizedUpdates = (!order.trackingUpdates || order.trackingUpdates.length === 0)
+    ? steps.slice(0, currentStepIndex + 1).map((s, idx) => ({
+        id: `${order.id}-syn-${idx}`,
+        status: s.key,
+        message: s.label,
+        timestamp: new Date(new Date(order.createdAt).getTime() + idx * 30 * 60 * 1000).toISOString(),
+      }))
+    : order.trackingUpdates;
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
@@ -97,8 +120,8 @@ export default function OrderTrackingPage() {
 
         {/* Order Header */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">Order #{order.id}</h1>
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <h1 className="text-md lg:text-2xl font-bold text-gray-900">Order #{order.id}</h1>
             <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 ${getStatusColor(order.status)}`}>
               {getStatusIcon(order.status)}
               <span className="capitalize">{order.status.replace('-', ' ')}</span>
@@ -151,9 +174,41 @@ export default function OrderTrackingPage() {
         {/* Order Tracking */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Order Tracking</h2>
-          
+
+          {/* Horizontal Stepper */}
+          <div className="mb-8">
+            <div className="relative">
+              <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 rounded"></div>
+              <div
+                className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-green-500 rounded transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              ></div>
+              <div className="relative flex justify-between">
+                {steps.map((step, idx) => {
+                  const done = idx <= currentStepIndex;
+                  const isCurrent = idx === currentStepIndex;
+                  return (
+                    <div key={step.key} className="flex flex-col items-center text-center w-12 sm:w-auto">
+                      <div
+                        className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors duration-300 ${
+                          done ? 'border-green-600 bg-green-600 text-white' : 'border-gray-300 bg-white text-gray-400'
+                        } ${isCurrent ? 'ring-4 ring-green-100' : ''}`}
+                      >
+                        {step.icon}
+                      </div>
+                      <span className={`mt-2 text-[10px] sm:text-xs ${done ? 'text-gray-900' : 'text-gray-500'}`}>
+                        {step.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Vertical Timeline */}
           <div className="space-y-6">
-            {order.trackingUpdates?.map((update, index) => (
+            {synthesizedUpdates?.map((update) => (
               <div key={update.id} className="flex items-start space-x-4">
                 <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getStatusColor(update.status)}`}>
                   {getStatusIcon(update.status)}
@@ -168,10 +223,10 @@ export default function OrderTrackingPage() {
                     </span>
                   </div>
                   <p className="text-gray-600 mt-1">{update.message}</p>
-                  {update.location && (
+                  {'location' in update && (update as any).location && (
                     <div className="flex items-center space-x-1 mt-2 text-sm text-gray-500">
                       <MapPin className="h-4 w-4" />
-                      <span>{update.location}</span>
+                      <span>{(update as any).location}</span>
                     </div>
                   )}
                 </div>

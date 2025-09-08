@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Star, ThumbsUp, Shield, MoreVertical, Flag } from 'lucide-react';
 import { Review } from '../../types';
-import { useApp } from '../../contexts/AppContext';
 
 interface ReviewCardProps {
   review: Review;
@@ -10,7 +9,6 @@ interface ReviewCardProps {
 }
 
 export default function ReviewCard({ review, showProductInfo = false, showBusinessInfo = false }: ReviewCardProps) {
-  const { state } = useApp();
   const [isHelpful, setIsHelpful] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -26,18 +24,19 @@ export default function ReviewCard({ review, showProductInfo = false, showBusine
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+        <div className="flex items-center space-x-3 min-w-0">
           <img
             src={review.userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.userName)}&background=10b981&color=fff`}
             alt={review.userName}
             className="w-12 h-12 rounded-full object-cover"
           />
-          <div>
-            <div className="flex items-center space-x-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-semibold text-gray-900">{review.userName}</h4>
               {review.verified && (
-                <div className="flex items-center space-x-1 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                <div className="inline-flex items-center space-x-1 bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs whitespace-nowrap shrink-0">
                   <Shield className="h-3 w-3" />
                   <span>Verified Purchase</span>
                 </div>
@@ -47,7 +46,7 @@ export default function ReviewCard({ review, showProductInfo = false, showBusine
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 sm:self-start">
           <div className="flex items-center space-x-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
@@ -68,7 +67,7 @@ export default function ReviewCard({ review, showProductInfo = false, showBusine
             </button>
             
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+              <div className="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
                 <button
                   onClick={handleReport}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
@@ -109,10 +108,10 @@ export default function ReviewCard({ review, showProductInfo = false, showBusine
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-100">
         <button
           onClick={handleHelpfulClick}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+          className={`inline-flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
             isHelpful
               ? 'bg-green-100 text-green-700'
               : 'text-gray-600 hover:bg-gray-100'
