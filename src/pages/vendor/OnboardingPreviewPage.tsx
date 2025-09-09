@@ -10,19 +10,28 @@ export default function OnboardingPreviewPage() {
 
   const { onboardingData } = state;
 
+  const fileToDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
   const handleCreateStore = async () => {
     setIsCreating(true);
 
     // Simulate API call
-    setTimeout(() => {
+    setTimeout(async () => {
+      const logoFile = onboardingData.businessInfo.logo;
+      const logoDataUrl = logoFile ? await fileToDataUrl(logoFile) : undefined;
+
       const newBusiness = {
         id: `vb${Date.now()}`,
         ownerId: state.user?.id || '1',
         name: onboardingData.businessInfo.name,
         description: onboardingData.businessInfo.description,
-        logo: onboardingData.businessInfo.logo 
-          ? URL.createObjectURL(onboardingData.businessInfo.logo)
-          : 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=200',
+        // Persist as data URL for reload-proof logo
+        logo: logoDataUrl || 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=200',
         businessType: onboardingData.businessType as 'goods' | 'services' | 'both',
         category: onboardingData.businessInfo.category,
         tags: onboardingData.businessInfo.tags,

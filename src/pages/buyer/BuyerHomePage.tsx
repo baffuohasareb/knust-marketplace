@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Search, MapPin, TrendingUp, Percent, Clock } from 'lucide-react';
 import BusinessCard from '../../components/Business/BusinessCard';
 import EmptyState from '../../components/Common/EmptyState';
 import ErrorState from '../../components/Common/ErrorState';
 import { mockBusinesses } from '../../data/mockData';
+import { useApp } from '../../contexts/AppContext';
+import type { Business } from '../../types';
 
 export default function BuyerHomePage() {
+  const { state } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +16,36 @@ export default function BuyerHomePage() {
 
   const categories = ['all', 'Electronics', 'Food', 'Stationery', 'Books', 'Beverages', 'Accessories'];
 
-  const filteredBusinesses = mockBusinesses.filter(business => {
+  const allBusinesses: Business[] = useMemo(() => {
+    // Map vendor-owned businesses to the public Business shape
+    const mappedVendors: Business[] = (state.userBusinesses || []).map((vb) => ({
+      id: vb.id,
+      name: vb.name,
+      logo: vb.logo,
+      description: vb.description,
+      location: vb.contactInfo?.hall || 'On Campus',
+      rating: vb.rating ?? 4.7,
+      reviewCount: vb.reviewCount ?? 0,
+      phone: vb.contactInfo?.phone,
+      whatsapp: vb.contactInfo?.whatsapp,
+      chatEnabled: true,
+      deliveryAvailable: vb.delivery?.available ?? false,
+      categories: vb.tags && vb.tags.length > 0 ? vb.tags : [vb.category].filter(Boolean) as string[],
+      images: vb.logo ? [vb.logo] : [],
+      joinedDate: vb.createdAt,
+      totalSales: vb.productCount || 0,
+      responseTime: 'Varies',
+      isVerified: false,
+    }));
+
+    // Merge with mock businesses (store-first de-dup by id)
+    const map = new Map<string, Business>();
+    mappedVendors.forEach((b) => map.set(b.id, b));
+    mockBusinesses.forEach((b) => { if (!map.has(b.id)) map.set(b.id, b); });
+    return Array.from(map.values());
+  }, [state.userBusinesses]);
+
+  const filteredBusinesses = allBusinesses.filter(business => {
     const matchesSearch = business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          business.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || 

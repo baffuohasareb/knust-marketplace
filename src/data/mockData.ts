@@ -5,7 +5,7 @@ export const mockBusinesses: Business[] = [
   { 
     id: '1',
     name: 'TechHub Electronics',
-    logo: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=200',
+    logo: 'https://i.pinimg.com/1200x/99/64/a2/9964a202c67115b1f40714082848c312.jpg',
     description: 'Latest electronics and accessories for students',
     location: 'Unity Hall',
     rating: 4.8,
@@ -28,7 +28,7 @@ export const mockBusinesses: Business[] = [
   {
     id: '2',
     name: 'Campus Cuisine',
-    logo: 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=200',
+    logo: 'https://i.pinimg.com/1200x/45/d5/05/45d50580361055196da23071107e5c56.jpg',
     description: 'Delicious local and continental dishes',
     location: 'Katanga Hall',
     rating: 4.6,
@@ -51,7 +51,7 @@ export const mockBusinesses: Business[] = [
   {
     id: '3',
     name: 'Study Supplies Store',
-    logo: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&w=200',
+    logo: 'https://i.pinimg.com/1200x/2f/f8/e2/2ff8e292531ccde406fd1a8b6e197b30.jpg',
     description: 'All your academic needs in one place',
     location: 'Queen Elizabeth II Hall',
     rating: 4.7,
@@ -308,7 +308,7 @@ export const mockUserBusinesses: VendorBusiness[] = [
     ownerId: '1',
     name: 'Campus Tech Solutions',
     description: 'Laptop repairs, phone accessories, and tech support for students',
-    logo: 'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=200',
+    logo: 'https://i.pinimg.com/736x/e6/25/da/e625da1b41ad7ce5bb4c296da651429f.jpg',
     businessType: 'both',
     category: 'Electronics & Tech',
     tags: ['laptop repair', 'phone accessories', 'tech support'],
@@ -336,7 +336,7 @@ export const mockUserBusinesses: VendorBusiness[] = [
     ownerId: '1',
     name: 'Study Buddy Tutoring',
     description: 'Mathematics and Engineering tutoring services',
-    logo: 'https://images.pexels.com/photos/159751/book-address-book-learning-learn-159751.jpeg?auto=compress&cs=tinysrgb&w=200',
+    logo: 'https://i.pinimg.com/1200x/96/ef/d9/96efd91642dddf67586018e0eae05a27.jpg',
     businessType: 'services',
     category: 'Education & Tutoring',
     tags: ['mathematics', 'engineering', 'tutoring'],
@@ -366,8 +366,8 @@ export const mockVendorProducts: VendorProduct[] = [
     description: 'Professional laptop screen replacement service with 6-month warranty',
     price: 250,
     images: [
-      'https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg?auto=compress&cs=tinysrgb&w=400'
+      'https://i.pinimg.com/736x/2e/5d/6d/2e5d6d5d5d5d5d5d5d5d5d5d5d5d5d5d.jpg',
+      'https://i.pinimg.com/736x/2e/5d/6d/2e5d6d5d5d5d5d5d5d5d5d5d5d5d5d5d.jpg'
     ],
     category: 'Electronics & Tech',
     stock: 10,

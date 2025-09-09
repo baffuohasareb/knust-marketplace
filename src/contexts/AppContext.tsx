@@ -163,6 +163,31 @@ function appReducer(state: AppState, action: AppAction): AppState {
         orders: [],
         vendorOrders: [],
       };
+    case 'ADD_USER_BUSINESS':
+      return {
+        ...state,
+        userBusinesses: [action.payload, ...state.userBusinesses],
+      };
+    case 'UPDATE_ONBOARDING_DATA':
+      return {
+        ...state,
+        onboardingData: {
+          ...state.onboardingData,
+          ...action.payload,
+          businessInfo: {
+            ...state.onboardingData.businessInfo,
+            ...(action.payload.businessInfo || {} as any),
+          },
+          contactInfo: {
+            ...state.onboardingData.contactInfo,
+            ...(action.payload.contactInfo || {} as any),
+          },
+          delivery: {
+            ...state.onboardingData.delivery,
+            ...(action.payload.delivery || {} as any),
+          },
+        },
+      };
     case 'CLEAR_ONBOARDING_DATA':
       return {
         ...state,
@@ -180,11 +205,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem('knust_marketplace_app_state');
       if (raw) {
         const parsed = JSON.parse(raw) as AppState;
+        // Merge latest mockUserBusinesses visuals (e.g., logo) into any persisted seed entries
+        const mergedUserBusinesses = (parsed.userBusinesses && parsed.userBusinesses.length > 0)
+          ? parsed.userBusinesses.map((ub) => {
+              const seed = mockUserBusinesses.find(m => m.id === ub.id);
+              return seed
+                ? {
+                    ...ub,
+                    // Always prefer the latest mock logo for demo seeds so changes in mockData reflect without manual cache clearing
+                    logo: seed.logo || ub.logo,
+                  }
+                : ub;
+            })
+          : initialState.userBusinesses;
+
         return {
           ...initialState,
           ...parsed,
-          // Ensure required demo businesses are present for showcasing
-          userBusinesses: parsed.userBusinesses && parsed.userBusinesses.length > 0 ? parsed.userBusinesses : initialState.userBusinesses,
+          // Ensure required demo businesses are present for showcasing and keep their visuals fresh
+          userBusinesses: mergedUserBusinesses,
         } as AppState;
       }
     } catch (e) {
