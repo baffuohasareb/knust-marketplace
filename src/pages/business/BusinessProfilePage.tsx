@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+
 import { useParams, Link } from 'react-router-dom';
-import { Phone, MessageCircle, Star, MapPin, Heart, ArrowLeft, ExternalLink, Flag, Calendar, TrendingUp, Shield, Clock } from 'lucide-react';
+import { Phone, MessageCircle, Star, MapPin, Heart, ArrowLeft, ExternalLink, Flag, Calendar, Shield, Clock } from 'lucide-react';
 import { mockBusinesses, mockProducts, mockReviews } from '../../data/mockData';
+
 import { useProductsStore } from '../../store/productsStore';
 
 import ProductCard from '../../components/Product/ProductCard';
@@ -15,7 +17,33 @@ export default function BusinessProfilePage() {
   const [activeTab, setActiveTab] = useState('products');
   const { products: storeProducts } = useProductsStore();
 
-  const business = mockBusinesses.find(b => b.id === businessId);
+  // Resolve business: prefer vendor-created businesses, fallback to mocks
+  const business = useMemo(() => {
+    const vb = state.userBusinesses.find(b => b.id === businessId);
+    if (vb) {
+      return {
+        id: vb.id,
+        name: vb.name,
+        logo: vb.logo,
+        description: vb.description,
+        location: vb.contactInfo?.hall || 'On Campus',
+        rating: vb.rating ?? 4.7,
+        reviewCount: vb.reviewCount ?? 0,
+        phone: vb.contactInfo?.phone,
+        whatsapp: vb.contactInfo?.whatsapp,
+        chatEnabled: true,
+        deliveryAvailable: vb.delivery?.available ?? false,
+        categories: vb.tags && vb.tags.length > 0 ? vb.tags : [vb.category].filter(Boolean) as string[],
+        images: vb.logo ? [vb.logo] : [],
+        joinedDate: vb.createdAt,
+        totalSales: vb.productCount || 0,
+        responseTime: 'Varies',
+        isVerified: false,
+      } as any;
+    }
+    return mockBusinesses.find(b => b.id === businessId);
+  }, [businessId, state.userBusinesses]);
+
   // Merge persisted products with mock, de-dup by id
   const mergedProducts = [
     ...storeProducts.filter(p => p.businessId === businessId),
@@ -106,11 +134,7 @@ export default function BusinessProfilePage() {
                 <p className="text-sm text-gray-600">Joined</p>
                 <p className="font-semibold">{business.joinedDate ? new Date(business.joinedDate).toLocaleDateString() : 'N/A'}</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Total Sales</p>
-                <p className="font-semibold">{business.totalSales || 0}</p>
-              </div>
+            
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <Clock className="h-6 w-6 text-green-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Response Time</p>
@@ -172,7 +196,7 @@ export default function BusinessProfilePage() {
 
             {/* Categories */}
             <div className="flex flex-wrap gap-2">
-              {business.categories.map((category) => (
+              {business.categories.map((category: string) => (
                 <span
                   key={category}
                   className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium"
